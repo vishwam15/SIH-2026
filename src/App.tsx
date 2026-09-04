@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import type { PageId, MapZone, EmergencyAlert, SensorData, UserRole } from './types';
 import { DisasterShieldAPI } from './services/api';
 import { Navbar } from './components/common/Navbar';
@@ -15,15 +16,73 @@ import { Analytics } from './pages/Analytics';
 import { Settings } from './pages/Settings';
 import { LoginPage } from './pages/LoginPage';
 
+const pageToPath = (page: PageId): string => {
+  switch (page) {
+    case 'landing':
+      return '/landingpage';
+    case 'login':
+      return '/login';
+    case 'dashboard':
+      return '/dashboard';
+    case 'flood':
+      return '/flood';
+    case 'landslide':
+      return '/landslide';
+    case 'ai-prediction':
+      return '/ai-prediction';
+    case 'sensors':
+      return '/sensors';
+    case 'alerts':
+      return '/alerts';
+    case 'routes':
+      return '/routes';
+    case 'analytics':
+      return '/analytics';
+    case 'settings':
+      return '/settings';
+    default:
+      return '/landingpage';
+  }
+};
+
+const getPageFromPath = (pathname: string): PageId => {
+  switch (pathname) {
+    case '/':
+    case '/landingpage':
+      return 'landing';
+    case '/login':
+      return 'login';
+    case '/dashboard':
+      return 'dashboard';
+    case '/flood':
+      return 'flood';
+    case '/landslide':
+      return 'landslide';
+    case '/ai-prediction':
+      return 'ai-prediction';
+    case '/sensors':
+      return 'sensors';
+    case '/alerts':
+      return 'alerts';
+    case '/routes':
+      return 'routes';
+    case '/analytics':
+      return 'analytics';
+    case '/settings':
+      return 'settings';
+    default:
+      return 'landing';
+  }
+};
+
 export const App: React.FC = () => {
-  // STEP 1 -> STEP 2 -> STEP 3 Page State
-  const [currentPage, setCurrentPage] = useState<PageId>('landing');
+  const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isSimulatingLive, setIsSimulatingLive] = useState(true);
   const [userRole, setUserRole] = useState<UserRole>('authority');
   const [userEmail, setUserEmail] = useState<string>('officer.authority@sih2026.gov');
 
-  // Telemetry Data States
   const [stats, setStats] = useState<any>(null);
   const [zones, setZones] = useState<MapZone[]>([]);
   const [sensors, setSensors] = useState<SensorData[]>([]);
@@ -34,7 +93,6 @@ export const App: React.FC = () => {
   const [safeRoutes, setSafeRoutes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Initial Telemetry Data Loading
   useEffect(() => {
     const initData = async () => {
       try {
@@ -76,7 +134,6 @@ export const App: React.FC = () => {
     initData();
   }, []);
 
-  // Live Stream Telemetry Fluctuations
   useEffect(() => {
     if (!isSimulatingLive) return;
 
@@ -85,20 +142,14 @@ export const App: React.FC = () => {
         if (!prevStats) return prevStats;
         const deltaRain = (Math.random() - 0.45) * 1.5;
         const newRain = Math.max(20, Math.min(120, +(prevStats.currentRainfallMmHr + deltaRain).toFixed(1)));
-        return {
-          ...prevStats,
-          currentRainfallMmHr: newRain,
-        };
+        return { ...prevStats, currentRainfallMmHr: newRain };
       });
 
       setFloodMetrics((prevMetrics: any) => {
         if (!prevMetrics) return prevMetrics;
         const deltaWater = (Math.random() - 0.48) * 0.05;
         const newWater = Math.max(0.5, Math.min(3.0, +(prevMetrics.waterLevelM + deltaWater).toFixed(2)));
-        return {
-          ...prevMetrics,
-          waterLevelM: newWater,
-        };
+        return { ...prevMetrics, waterLevelM: newWater };
       });
 
       setSensors((prevSensors) =>
@@ -127,11 +178,11 @@ export const App: React.FC = () => {
 
   const handleSelectZone = (zone: MapZone) => {
     if (zone.type === 'flood') {
-      setCurrentPage('flood');
+      navigate('/flood');
     } else if (zone.type === 'landslide') {
-      setCurrentPage('landslide');
+      navigate('/landslide');
     } else {
-      setCurrentPage('sensors');
+      navigate('/sensors');
     }
   };
 
@@ -140,6 +191,15 @@ export const App: React.FC = () => {
     setUserEmail(email);
   };
 
+  const handleNavigate = (page: PageId) => {
+    navigate(pageToPath(page));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const currentPage = getPageFromPath(location.pathname);
+  const isLanding = currentPage === 'landing';
+  const isLogin = currentPage === 'login';
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white p-4">
@@ -147,7 +207,7 @@ export const App: React.FC = () => {
           <div className="w-8 h-8 rounded-full border-4 border-emerald-400 border-t-transparent animate-spin" />
         </div>
         <h2 className="text-xl font-bold font-display">DisasterShield AI</h2>
-        <p className="text-xs text-slate-400 mt-1">Initializing 3D Telemetry Mesh...</p>
+        <p className="text-xs text-slate-400 mt-1">Initializing NDMA Real-Time Telemetry Node...</p>
       </div>
     );
   }
@@ -156,34 +216,25 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-white">
-      {/* 1. Header Bar (h-14 bg-slate-900/90 border-b border-slate-800 fixed top-0 left-0 right-0 z-50 px-4) */}
-      {currentPage !== 'landing' && currentPage !== 'login' && (
+      {!isLanding && !isLogin && (
         <Navbar
           currentPage={currentPage}
-          onNavigate={(p) => {
-            setCurrentPage(p);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
+          onNavigate={handleNavigate}
           activeAlertCount={activeAlertCount}
           isSimulatingLive={isSimulatingLive}
           onToggleSimulateLive={() => setIsSimulatingLive(!isSimulatingLive)}
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
           userRole={userRole}
           userEmail={userEmail}
-          onLogout={() => setCurrentPage('login')}
+          onLogout={() => handleNavigate('login')}
         />
       )}
 
-      {/* Main Layout Area */}
       <div className="flex-1 flex relative">
-        {/* 2. Persistent Left Sidebar (w-64 fixed top-14 left-0 bottom-0 bg-slate-900 border-r border-slate-800 p-4) */}
-        {currentPage !== 'landing' && currentPage !== 'login' && (
+        {!isLanding && !isLogin && (
           <Sidebar
             currentPage={currentPage}
-            onNavigate={(p) => {
-              setCurrentPage(p);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
+            onNavigate={handleNavigate}
             isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
             activeAlertCount={activeAlertCount}
@@ -191,56 +242,53 @@ export const App: React.FC = () => {
           />
         )}
 
-        {/* 3. Main Content Panel (pl-6 pt-14 flex-1 h-screen overflow-y-auto bg-slate-950) */}
         <main
           className={`flex-1 w-full transition-all ${
-            currentPage === 'landing' || currentPage === 'login'
+            isLanding || isLogin
               ? 'pl-0 pt-0 min-h-screen overflow-y-auto'
               : 'pl-0 lg:pl-6 pt-14 h-screen overflow-y-auto bg-slate-950'
           }`}
         >
-          {currentPage === 'landing' && <LandingPage onNavigate={setCurrentPage} />}
-
-          {currentPage === 'login' && (
-            <LoginPage
-              onLoginSuccess={handleLoginSuccess}
-              onNavigate={setCurrentPage}
+          <Routes>
+            <Route path="/" element={<Navigate to="/landingpage" replace />} />
+            <Route path="/landingpage" element={<LandingPage onNavigate={handleNavigate} />} />
+            <Route
+              path="/login"
+              element={<LoginPage onLoginSuccess={handleLoginSuccess} onNavigate={handleNavigate} />}
             />
-          )}
-
-          {currentPage === 'dashboard' && (
-            <Dashboard
-              stats={stats}
-              zones={zones}
-              sensors={sensors}
-              alerts={alerts}
-              onNavigate={setCurrentPage}
-              onSelectZone={handleSelectZone}
-              userRole={userRole}
+            <Route
+              path="/dashboard"
+              element={
+                <Dashboard
+                  stats={stats}
+                  zones={zones}
+                  sensors={sensors}
+                  alerts={alerts}
+                  onNavigate={handleNavigate}
+                  onSelectZone={handleSelectZone}
+                  userRole={userRole}
+                />
+              }
             />
-          )}
-
-          {currentPage === 'flood' && (
-            <FloodIntelligence metrics={floodMetrics} onNavigate={setCurrentPage} />
-          )}
-
-          {currentPage === 'landslide' && (
-            <LandslideIntelligence metrics={landslideMetrics} onNavigate={setCurrentPage} />
-          )}
-
-          {currentPage === 'ai-prediction' && <AIPrediction predictions={aiPredictions} />}
-
-          {currentPage === 'sensors' && <SensorMonitoring sensors={sensors} />}
-
-          {currentPage === 'alerts' && (
-            <Alerts alerts={alerts} onAcknowledge={handleAcknowledgeAlert} />
-          )}
-
-          {currentPage === 'routes' && <SafeRoutes routes={safeRoutes} />}
-
-          {currentPage === 'analytics' && <Analytics />}
-
-          {currentPage === 'settings' && <Settings />}
+            <Route
+              path="/flood"
+              element={<FloodIntelligence metrics={floodMetrics} onNavigate={handleNavigate} />}
+            />
+            <Route
+              path="/landslide"
+              element={<LandslideIntelligence metrics={landslideMetrics} onNavigate={handleNavigate} />}
+            />
+            <Route path="/ai-prediction" element={<AIPrediction predictions={aiPredictions} />} />
+            <Route path="/sensors" element={<SensorMonitoring sensors={sensors} />} />
+            <Route
+              path="/alerts"
+              element={<Alerts alerts={alerts} onAcknowledge={handleAcknowledgeAlert} />}
+            />
+            <Route path="/routes" element={<SafeRoutes routes={safeRoutes} />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="*" element={<Navigate to="/landingpage" replace />} />
+          </Routes>
         </main>
       </div>
     </div>

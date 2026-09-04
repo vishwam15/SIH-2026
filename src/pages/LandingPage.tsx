@@ -325,38 +325,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       <section id="showcase" className="py-28 max-w-7xl mx-auto px-6 space-y-36 relative bg-black/50 backdrop-blur-md rounded-[40px] mt-20 border border-white/10 shadow-2xl z-10">
 
         {/* Module 01: Urban Flood Recon (Animated Flood.png Video Canvas) */}
-        <div className="grid lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-7 group cursor-pointer" onClick={() => onNavigate('flood')}>
-            <div className="relative rounded-3xl overflow-hidden glass-card p-2 group-hover:border-cyan-400 transition-all duration-500 shadow-[0_0_25px_#00f2fe] group-hover:shadow-[0_0_40px_#00f2fe] transform group-hover:scale-[1.03]">
-              <div className="relative aspect-video rounded-2xl overflow-hidden bg-black flex items-center justify-center border border-cyan-500/40">
-                <AnimatedFloodCanvas className="w-full h-full transition-all duration-500 group-hover:blur-[1px]" />
-                
-                {/* Default Telemetry Badge */}
-                <div className="absolute bottom-4 left-4 px-3.5 py-2 rounded-xl bg-black/80 backdrop-blur-md border border-cyan-400 text-xs font-extrabold text-cyan-400 flex items-center gap-2 shadow-[0_0_15px_#00F0FF]">
-                  <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" /> Urban Inundation Telemetry
-                </div>
-
-                {/* Hover Reveal Overlay Tooltip */}
-                <div className="absolute top-4 right-4 px-4 py-2 rounded-xl bg-black/90 backdrop-blur-md border border-cyan-400 text-xs font-black text-cyan-300 shadow-[0_0_25px_#00f2fe] opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 flex items-center gap-2 z-20">
-                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-                  <span>Urban Flood Recon Engine: Active</span>
-                </div>
+        <div className="split-module-card group cursor-pointer" onClick={() => onNavigate('flood')}>
+          <div className="split-module-visual">
+            <div className="relative h-full w-full rounded-[28px] overflow-hidden bg-black border border-cyan-500/40">
+              <AnimatedFloodCanvas className="w-full h-full" />
+              <div className="split-module-badge">
+                <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
+                Urban Inundation Telemetry
               </div>
+              <div className="split-module-overlay">Urban Flood Recon Engine: Active</div>
             </div>
           </div>
-          <div className="lg:col-span-5 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/40 text-xs font-black uppercase tracking-widest shadow-[0_0_10px_rgba(0,240,255,0.3)]">
+          <div className="split-module-copy">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/40 text-[10px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(0,240,255,0.3)]">
               Module 01 // Municipal Safety
             </div>
-            <h2 className="font-display font-black text-4xl sm:text-5xl text-white tracking-tight leading-none drop-shadow-md">
-              URBAN FLOOD <br />RECON ENGINE.
-            </h2>
-            <p className="text-gray-300 text-base leading-relaxed font-medium">
+            <h2>URBAN FLOOD<br />RECON ENGINE</h2>
+            <p>
               Hydrodynamic stormwater drain monitoring, ultrasonic river crest measurement, and flood inundation risk prediction over time.
             </p>
             <button
-              onClick={() => onNavigate('flood')}
-              className="px-6 py-3 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition cursor-pointer"
+              onClick={(event) => {
+                event.stopPropagation();
+                onNavigate('flood');
+              }}
+              className="px-6 py-3 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition cursor-pointer"
             >
               <span>Explore Flood Intelligence</span>
               <ArrowRight className="w-4 h-4" />
@@ -365,78 +358,64 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </div>
 
         {/* Module 02: Mountain Landslide (Animated Landslide.png Video Canvas) */}
-        <div className="grid lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-5 space-y-6 order-2 lg:order-1">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/40 text-xs font-black uppercase tracking-widest shadow-[0_0_10px_rgba(245,158,11,0.3)]">
+        <div className="split-module-card group cursor-pointer" onClick={() => onNavigate('landslide')}>
+          <div className="split-module-visual">
+            <div className="relative h-full w-full rounded-[28px] overflow-hidden bg-black border border-amber-500/40">
+              <AnimatedLandslideCanvas className="w-full h-full" />
+              <div className="split-module-badge" style={{ borderColor: 'rgba(245, 158, 11, 0.5)', color: '#fbbf24' }}>
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
+                Slope Movement Active
+              </div>
+              <div className="split-module-overlay" style={{ borderColor: 'rgba(245, 158, 11, 0.45)', color: '#fbbf24' }}>Landslide Instability Guard: Active</div>
+            </div>
+          </div>
+          <div className="split-module-copy" style={{ width: '54%' }}>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/40 text-[10px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(245,158,11,0.3)]">
               Module 02 // Terrain Telemetry
             </div>
-            <h2 className="font-display font-black text-4xl sm:text-5xl text-white tracking-tight leading-none drop-shadow-md">
-              LANDSLIDE SLOPE <br />INSTABILITY GUARD.
-            </h2>
-            <p className="text-gray-300 text-base leading-relaxed font-medium">
+            <h2 style={{ color: '#fff7ed' }}>LANDSLIDE SLOPE<br />INSTABILITY GUARD</h2>
+            <p>
               TDR soil moisture saturation, MEMS dual-axis ground inclinometers, and micro-seismic slope collapse early warning.
             </p>
             <button
-              onClick={() => onNavigate('landslide')}
-              className="px-6 py-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition cursor-pointer"
+              onClick={(event) => {
+                event.stopPropagation();
+                onNavigate('landslide');
+              }}
+              className="px-6 py-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition cursor-pointer"
             >
               <span>Explore Landslide Intelligence</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
-          <div className="lg:col-span-7 order-1 lg:order-2 group cursor-pointer" onClick={() => onNavigate('landslide')}>
-            <div className="relative rounded-3xl overflow-hidden glass-card-pink p-2 group-hover:border-amber-400 transition-all duration-500 shadow-[0_0_25px_#f59e0b] group-hover:shadow-[0_0_40px_#f59e0b] transform group-hover:scale-[1.03]">
-              <div className="relative aspect-video rounded-2xl overflow-hidden bg-black flex items-center justify-center border border-amber-500/40">
-                <AnimatedLandslideCanvas className="w-full h-full transition-all duration-500 group-hover:blur-[1px]" />
-                
-                {/* Default Telemetry Badge */}
-                <div className="absolute bottom-4 left-4 px-3.5 py-2 rounded-xl bg-black/80 backdrop-blur-md border border-amber-400 text-xs font-extrabold text-amber-400 flex items-center gap-2 shadow-[0_0_15px_#F59E0B]">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" /> Slope Movement Active
-                </div>
-
-                {/* Hover Reveal Overlay Tooltip */}
-                <div className="absolute top-4 right-4 px-4 py-2 rounded-xl bg-black/90 backdrop-blur-md border border-amber-400 text-xs font-black text-amber-300 shadow-[0_0_25px_#f59e0b] opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 flex items-center gap-2 z-20">
-                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-                  <span>Landslide Instability Guard: Active</span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Module 03: Safe Route Evacuation (Animated evacuation.png Video Canvas) */}
-        <div className="grid lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-7 group cursor-pointer" onClick={() => onNavigate('routes')}>
-            <div className="relative rounded-3xl overflow-hidden glass-card p-2 group-hover:border-emerald-400 transition-all duration-500 shadow-[0_0_25px_#10b981] group-hover:shadow-[0_0_40px_#10b981] transform group-hover:scale-[1.03]">
-              <div className="relative aspect-video rounded-2xl overflow-hidden bg-black flex items-center justify-center border border-emerald-500/40">
-                <AnimatedEvacuationCanvas className="w-full h-full transition-all duration-500 group-hover:blur-[1px]" />
-                
-                {/* Default Telemetry Badge */}
-                <div className="absolute bottom-4 left-4 px-3.5 py-2 rounded-xl bg-black/80 backdrop-blur-md border border-emerald-400 text-xs font-extrabold text-emerald-400 flex items-center gap-2 shadow-[0_0_15px_#10B981]">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" /> GIS Evacuation Routing
-                </div>
-
-                {/* Hover Reveal Overlay Tooltip */}
-                <div className="absolute top-4 right-4 px-4 py-2 rounded-xl bg-black/90 backdrop-blur-md border border-emerald-400 text-xs font-black text-emerald-300 shadow-[0_0_25px_#10b981] opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 flex items-center gap-2 z-20">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                  <span>Safe Evacuation Route Dispatch: Active</span>
-                </div>
+        <div className="split-module-card group cursor-pointer" onClick={() => onNavigate('routes')}>
+          <div className="split-module-visual">
+            <div className="relative h-full w-full rounded-[28px] overflow-hidden bg-black border border-emerald-500/40">
+              <AnimatedEvacuationCanvas className="w-full h-full" />
+              <div className="split-module-badge" style={{ borderColor: 'rgba(16, 185, 129, 0.5)', color: '#6ee7b7' }}>
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                GIS Evacuation Routing
               </div>
+              <div className="split-module-overlay" style={{ borderColor: 'rgba(16, 185, 129, 0.45)', color: '#6ee7b7' }}>Safe Evacuation Route Dispatch: Active</div>
             </div>
           </div>
-          <div className="lg:col-span-5 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/40 text-xs font-black uppercase tracking-widest shadow-[0_0_10px_rgba(16,185,129,0.3)]">
+          <div className="split-module-copy">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/40 text-[10px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(16,185,129,0.3)]">
               Module 03 // Citizen Relief
             </div>
-            <h2 className="font-display font-black text-4xl sm:text-5xl text-white tracking-tight leading-none drop-shadow-md">
-              SAFE EVACUATION <br />ROUTE DISPATCH.
-            </h2>
-            <p className="text-gray-300 text-base leading-relaxed font-medium">
+            <h2 style={{ color: '#ecfdf5' }}>SAFE EVACUATION<br />ROUTE DISPATCH</h2>
+            <p>
               Real-time open street maps marking dangerous waterlogged roads in red and safe shelter evacuation routes in green.
             </p>
             <button
-              onClick={() => onNavigate('routes')}
-              className="px-6 py-3 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition cursor-pointer"
+              onClick={(event) => {
+                event.stopPropagation();
+                onNavigate('routes');
+              }}
+              className="px-6 py-3 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition cursor-pointer"
             >
               <span>Find Evacuation Routes</span>
               <ArrowRight className="w-4 h-4" />
