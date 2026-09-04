@@ -191,12 +191,12 @@ export const App: React.FC = () => {
           />
         )}
 
-        {/* 3. Main Content Panel (pl-64 pt-14 flex-1 h-screen overflow-y-auto bg-slate-950) */}
+        {/* 3. Main Content Panel (pl-6 pt-14 flex-1 h-screen overflow-y-auto bg-slate-950) */}
         <main
           className={`flex-1 w-full transition-all ${
             currentPage === 'landing' || currentPage === 'login'
               ? 'pl-0 pt-0 min-h-screen overflow-y-auto'
-              : 'pl-0 lg:pl-64 pt-14 h-screen overflow-y-auto bg-slate-950'
+              : 'pl-0 lg:pl-6 pt-14 h-screen overflow-y-auto bg-slate-950'
           }`}
         >
           {currentPage === 'landing' && <LandingPage onNavigate={setCurrentPage} />}

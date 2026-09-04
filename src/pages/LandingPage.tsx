@@ -185,7 +185,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             </h1>
 
             <p className="text-lg sm:text-xl text-gray-200 max-w-2xl font-medium leading-relaxed drop-shadow">
-              DisasterShield AI predicts urban floods and mountain landslides before impact using antigravity IoT sensor networks, hydrodynamic stormwater telemetry, and MEMS ground inclination models.
+              DisasterShield AI predicts urban floods and mountain landslides before impact using NDMA Integrated Hazard Feeds, hydrodynamic stormwater telemetry, and MEMS ground inclination models.
             </p>
 
             {/* Action CTA Buttons */}
@@ -284,7 +284,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 </div>
 
                 <div className="text-center">
-                  <h4 className="font-display font-black text-sm text-white tracking-widest uppercase">HARDWARE NODE: DISASTER-GRID-X9</h4>
+                  <h4 className="font-display font-black text-sm text-white tracking-widest uppercase">NDMA REAL-TIME TELEMETRY NODE: NDMA-GRID-X9</h4>
                   <p className="text-xs text-cyan-400 font-bold mt-1">Vector Mesh Locked • Stability: 99.8%</p>
                 </div>
 
@@ -310,14 +310,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       {/* 4. INFINITE MARQUEE RIBBON */}
       <div className="relative w-full py-5 bg-gradient-to-r from-cyan-600 via-purple-600 to-rose-600 border-y border-white/20 z-20 overflow-hidden shadow-[0_0_30px_rgba(0,240,255,0.4)]">
         <div className="flex whitespace-nowrap animate-marquee font-display font-black text-xl tracking-widest text-white uppercase">
-          <span className="mx-6 flex items-center gap-4">B2G DISASTER RELIEF <Activity className="w-5 h-5 text-cyan-300" /></span>
+          <span className="mx-6 flex items-center gap-4">NDMA INTEGRATED HAZARD FEEDS <Activity className="w-5 h-5 text-cyan-300" /></span>
           <span className="mx-6 flex items-center gap-4">URBAN FLOOD PREDICTION <Waves className="w-5 h-5 text-blue-300" /></span>
           <span className="mx-6 flex items-center gap-4">MOUNTAIN LANDSLIDE ALERTS <Mountain className="w-5 h-5 text-amber-300" /></span>
-          <span className="mx-6 flex items-center gap-4">ANTIGRAVITY SENSOR MESH <Radio className="w-5 h-5 text-rose-300" /></span>
-          <span className="mx-6 flex items-center gap-4">B2G DISASTER RELIEF <Activity className="w-5 h-5 text-cyan-300" /></span>
+          <span className="mx-6 flex items-center gap-4">NDMA REAL-TIME TELEMETRY NODE <Radio className="w-5 h-5 text-rose-300" /></span>
+          <span className="mx-6 flex items-center gap-4">NDMA INTEGRATED HAZARD FEEDS <Activity className="w-5 h-5 text-cyan-300" /></span>
           <span className="mx-6 flex items-center gap-4">URBAN FLOOD PREDICTION <Waves className="w-5 h-5 text-blue-300" /></span>
           <span className="mx-6 flex items-center gap-4">MOUNTAIN LANDSLIDE ALERTS <Mountain className="w-5 h-5 text-amber-300" /></span>
-          <span className="mx-6 flex items-center gap-4">ANTIGRAVITY SENSOR MESH <Radio className="w-5 h-5 text-rose-300" /></span>
+          <span className="mx-6 flex items-center gap-4">NDMA REAL-TIME TELEMETRY NODE <Radio className="w-5 h-5 text-rose-300" /></span>
         </div>
       </div>
 
@@ -326,12 +326,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 
         {/* Module 01: Urban Flood Recon (Animated Flood.png Video Canvas) */}
         <div className="grid lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-7 group">
-            <div className="relative rounded-3xl overflow-hidden glass-card p-2 group-hover:border-cyan-400 transition-all duration-500 shadow-[0_0_35px_rgba(0,240,255,0.3)]">
+          <div className="lg:col-span-7 group cursor-pointer" onClick={() => onNavigate('flood')}>
+            <div className="relative rounded-3xl overflow-hidden glass-card p-2 group-hover:border-cyan-400 transition-all duration-500 shadow-[0_0_25px_#00f2fe] group-hover:shadow-[0_0_40px_#00f2fe] transform group-hover:scale-[1.03]">
               <div className="relative aspect-video rounded-2xl overflow-hidden bg-black flex items-center justify-center border border-cyan-500/40">
-                <AnimatedFloodCanvas className="w-full h-full" />
+                <AnimatedFloodCanvas className="w-full h-full transition-all duration-500 group-hover:blur-[1px]" />
+                
+                {/* Default Telemetry Badge */}
                 <div className="absolute bottom-4 left-4 px-3.5 py-2 rounded-xl bg-black/80 backdrop-blur-md border border-cyan-400 text-xs font-extrabold text-cyan-400 flex items-center gap-2 shadow-[0_0_15px_#00F0FF]">
                   <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" /> Urban Inundation Telemetry
+                </div>
+
+                {/* Hover Reveal Overlay Tooltip */}
+                <div className="absolute top-4 right-4 px-4 py-2 rounded-xl bg-black/90 backdrop-blur-md border border-cyan-400 text-xs font-black text-cyan-300 shadow-[0_0_25px_#00f2fe] opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 flex items-center gap-2 z-20">
+                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+                  <span>Urban Flood Recon Engine: Active</span>
                 </div>
               </div>
             </div>
@@ -376,12 +384,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
-          <div className="lg:col-span-7 order-1 lg:order-2 group">
-            <div className="relative rounded-3xl overflow-hidden glass-card-pink p-2 group-hover:border-amber-400 transition-all duration-500 shadow-[0_0_35px_rgba(245,158,11,0.3)]">
+          <div className="lg:col-span-7 order-1 lg:order-2 group cursor-pointer" onClick={() => onNavigate('landslide')}>
+            <div className="relative rounded-3xl overflow-hidden glass-card-pink p-2 group-hover:border-amber-400 transition-all duration-500 shadow-[0_0_25px_#f59e0b] group-hover:shadow-[0_0_40px_#f59e0b] transform group-hover:scale-[1.03]">
               <div className="relative aspect-video rounded-2xl overflow-hidden bg-black flex items-center justify-center border border-amber-500/40">
-                <AnimatedLandslideCanvas className="w-full h-full" />
+                <AnimatedLandslideCanvas className="w-full h-full transition-all duration-500 group-hover:blur-[1px]" />
+                
+                {/* Default Telemetry Badge */}
                 <div className="absolute bottom-4 left-4 px-3.5 py-2 rounded-xl bg-black/80 backdrop-blur-md border border-amber-400 text-xs font-extrabold text-amber-400 flex items-center gap-2 shadow-[0_0_15px_#F59E0B]">
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" /> Slope Movement Active
+                </div>
+
+                {/* Hover Reveal Overlay Tooltip */}
+                <div className="absolute top-4 right-4 px-4 py-2 rounded-xl bg-black/90 backdrop-blur-md border border-amber-400 text-xs font-black text-amber-300 shadow-[0_0_25px_#f59e0b] opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 flex items-center gap-2 z-20">
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                  <span>Landslide Instability Guard: Active</span>
                 </div>
               </div>
             </div>
@@ -390,12 +406,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 
         {/* Module 03: Safe Route Evacuation (Animated evacuation.png Video Canvas) */}
         <div className="grid lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-7 group">
-            <div className="relative rounded-3xl overflow-hidden glass-card p-2 group-hover:border-emerald-400 transition-all duration-500 shadow-[0_0_35px_rgba(16,185,129,0.3)]">
+          <div className="lg:col-span-7 group cursor-pointer" onClick={() => onNavigate('routes')}>
+            <div className="relative rounded-3xl overflow-hidden glass-card p-2 group-hover:border-emerald-400 transition-all duration-500 shadow-[0_0_25px_#10b981] group-hover:shadow-[0_0_40px_#10b981] transform group-hover:scale-[1.03]">
               <div className="relative aspect-video rounded-2xl overflow-hidden bg-black flex items-center justify-center border border-emerald-500/40">
-                <AnimatedEvacuationCanvas className="w-full h-full" />
+                <AnimatedEvacuationCanvas className="w-full h-full transition-all duration-500 group-hover:blur-[1px]" />
+                
+                {/* Default Telemetry Badge */}
                 <div className="absolute bottom-4 left-4 px-3.5 py-2 rounded-xl bg-black/80 backdrop-blur-md border border-emerald-400 text-xs font-extrabold text-emerald-400 flex items-center gap-2 shadow-[0_0_15px_#10B981]">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" /> GIS Evacuation Routing
+                </div>
+
+                {/* Hover Reveal Overlay Tooltip */}
+                <div className="absolute top-4 right-4 px-4 py-2 rounded-xl bg-black/90 backdrop-blur-md border border-emerald-400 text-xs font-black text-emerald-300 shadow-[0_0_25px_#10b981] opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 flex items-center gap-2 z-20">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                  <span>Safe Evacuation Route Dispatch: Active</span>
                 </div>
               </div>
             </div>
@@ -445,9 +469,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-400/40 flex items-center justify-center text-purple-300 group-hover:scale-110 transition-transform shadow-[0_0_15px_#8B5CF6]">
                 <Radio className="w-7 h-7" />
               </div>
-              <h3 className="font-display font-bold text-xl text-white">Mesh Drone Radio Network</h3>
+              <h3 className="font-display font-bold text-xl text-white">NDMA Radio Telemetry Network</h3>
               <p className="text-sm text-gray-300 leading-relaxed font-medium">
-                Ultra-low latency RF mesh connecting antigravity sensor drones to regional disaster authority command centers.
+                Ultra-low latency RF mesh connecting NDMA Real-Time Telemetry Nodes to regional disaster authority command centers.
               </p>
             </div>
 
@@ -504,7 +528,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               <h3 className="text-3xl font-display font-black text-white mb-2">State Authority Setup</h3>
               <div className="text-4xl font-black text-rose-400 mb-6">$3,500,000 <span className="text-base text-gray-400 font-medium">/ setup</span></div>
               <p className="text-gray-400 text-sm mb-8 flex-grow">
-                Includes 26 IoT telemetry hardware nodes, antigravity drone platforms, and a 1-year Command OS SaaS License.
+                Includes 26 NDMA Real-Time Telemetry Nodes, airborne hazard surveillance platforms, and a 1-year Command OS SaaS License.
               </p>
               <button onClick={() => onNavigate('login')} className="w-full py-4 rounded-xl bg-gradient-to-r from-rose-500 to-purple-600 text-white font-black text-center transition-all shadow-[0_0_20px_rgba(255,0,127,0.4)] hover:scale-105 cursor-pointer">
                 Procure Authority Setup

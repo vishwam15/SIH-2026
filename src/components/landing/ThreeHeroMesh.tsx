@@ -147,7 +147,7 @@ const CityFloodMesh: React.FC<{ scrollY: number }> = ({ scrollY }) => {
         })
       )}
 
-      {/* Antigravity Weather Drone Floating */}
+      {/* NDMA Telemetry Weather Drone Floating */}
       <mesh position={[0, 1.8, 0]}>
         <octahedronGeometry args={[0.7, 0]} />
         <meshStandardMaterial
@@ -195,7 +195,7 @@ const MountainLandslideMesh: React.FC<{ scrollY: number }> = ({ scrollY }) => {
         />
       </mesh>
 
-      {/* Antigravity Sensor Drone Hovering */}
+      {/* NDMA Telemetry Sensor Drone Hovering */}
       <mesh position={[0.5, 2.2, 0.5]}>
         <icosahedronGeometry args={[0.5, 0]} />
         <meshStandardMaterial

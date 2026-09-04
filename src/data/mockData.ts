@@ -119,7 +119,7 @@ export const mockSensors: SensorData[] = [
   {
     id: 'sens-001',
     sensorId: 'FLD-AND-001',
-    name: 'Flood Ultrasonic Sensor #001',
+    name: 'NDMA Real-Time Telemetry Node #001 (Flood Ultrasonic)',
     locationName: 'Andheri Subway Main Drain',
     coordinates: { lat: 19.1197, lng: 72.8464 },
     type: 'Flood Sensor',
@@ -138,7 +138,7 @@ export const mockSensors: SensorData[] = [
   {
     id: 'sens-002',
     sensorId: 'RAIN-KRL-002',
-    name: 'Optical Rain Gauge #002',
+    name: 'NDMA Real-Time Telemetry Node #002 (Optical Rain Gauge)',
     locationName: 'Kurla West Weather Node',
     coordinates: { lat: 19.0657, lng: 72.8794 },
     type: 'Rain Gauge',
@@ -157,7 +157,7 @@ export const mockSensors: SensorData[] = [
   {
     id: 'sens-003',
     sensorId: 'WTR-HND-003',
-    name: 'Radar Water Level Sensor #003',
+    name: 'NDMA Real-Time Telemetry Node #003 (Radar Water Level)',
     locationName: 'Hindmata Siphon Outlet',
     coordinates: { lat: 19.0117, lng: 72.8437 },
     type: 'Water Level',
@@ -176,7 +176,7 @@ export const mockSensors: SensorData[] = [
   {
     id: 'sens-004',
     sensorId: 'SOIL-GHT-004',
-    name: 'TDR Soil Moisture Probe #004',
+    name: 'NDMA Real-Time Telemetry Node #004 (TDR Soil Moisture)',
     locationName: 'Ghatkopar East Ridge Slope',
     coordinates: { lat: 19.086, lng: 72.908 },
     type: 'Soil Moisture',
@@ -195,7 +195,7 @@ export const mockSensors: SensorData[] = [
   {
     id: 'sens-005',
     sensorId: 'TILT-MUM-005',
-    name: 'MEMS Dual-Axis Inclinometer #005',
+    name: 'NDMA Real-Time Telemetry Node #005 (MEMS Dual-Axis Inclinometer)',
     locationName: 'Mumbra Escarpment Cliff',
     coordinates: { lat: 19.1764, lng: 73.0232 },
     type: 'Tilt Sensor',
@@ -214,7 +214,7 @@ export const mockSensors: SensorData[] = [
   {
     id: 'sens-006',
     sensorId: 'VIB-LNV-006',
-    name: 'Piezoelectric Seismic Sensor #006',
+    name: 'NDMA Real-Time Telemetry Node #006 (Piezoelectric Seismic Sensor)',
     locationName: 'Khandala Tunnel Approach Slope',
     coordinates: { lat: 18.7557, lng: 73.3768 },
     type: 'Vibration Sensor',

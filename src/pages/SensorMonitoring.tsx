@@ -46,11 +46,11 @@ export const SensorMonitoring: React.FC<SensorMonitoringProps> = ({
               <Radio className="w-6 h-6" />
             </span>
             <h1 className="text-2xl lg:text-3xl font-extrabold text-white font-display">
-              IoT Sensor Monitoring Network 📡
+              NDMA Real-Time Telemetry Nodes 📡
             </h1>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Real-time telemetry stream from ultrasonic, rain gauge, TDR, tilt, and seismic edge nodes
+            Real-time telemetry stream from NDMA ultrasonic, rain gauge, TDR, tilt, and seismic edge nodes
           </p>
         </div>
 

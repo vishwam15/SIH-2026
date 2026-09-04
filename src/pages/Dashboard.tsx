@@ -294,12 +294,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
 
-        {/* Live Sensor Feed (Col 4) */}
+        {/* NDMA Integrated Hazard Feeds (Col 4) */}
         <div className="lg:col-span-4 glass-panel p-5 rounded-2xl border border-slate-800">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-base text-white font-display flex items-center gap-2">
               <Radio className="w-5 h-5 text-emerald-400" />
-              Live Sensor Feed
+              NDMA Integrated Hazard Feeds
             </h3>
             <button
               onClick={() => onNavigate('sensors')}

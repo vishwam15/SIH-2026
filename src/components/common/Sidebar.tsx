@@ -36,6 +36,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeAlertCount,
   userRole = 'authority',
 }) => {
+  const [isHovered, setIsHovered] = React.useState(false);
+
   const menuItems: { id: PageId; label: string; icon: any; badge?: number; roleAllowed?: UserRole[] }[] = [
     { id: 'landing', label: 'Overview Landing', icon: Home },
     { id: 'dashboard', label: 'Command Dashboard', icon: LayoutDashboard },
@@ -66,6 +68,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const RoleIcon = getRoleIcon();
+  const isExpanded = isOpen || isHovered;
 
   return (
     <>
@@ -77,16 +80,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
         />
       )}
 
-      {/* Persistent Left Sidebar: w-64 fixed left-0 top-14 bottom-0 bg-slate-900 border-r border-slate-800 */}
+      {/* Auto-Hiding Hover Left Sidebar */}
       <aside
-        className={`w-64 fixed left-0 top-14 bottom-0 z-40 bg-slate-900 border-r border-slate-800 flex flex-col transition-transform duration-300 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        style={{
+          transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
+        className={`w-64 fixed left-0 top-14 bottom-0 z-40 bg-slate-900/95 border-r border-slate-800 backdrop-blur-xl flex flex-col shadow-[0_0_30px_rgba(0,0,0,0.8)] ${
+          isExpanded ? 'translate-x-0' : '-translate-x-[90%]'
         }`}
       >
+        {/* Glow Trigger Zone Indicator on Left Viewport Edge when Collapsed */}
+        {!isExpanded && (
+          <div className="absolute right-0 top-0 bottom-0 w-2 bg-gradient-to-b from-cyan-400 via-blue-500 to-teal-400 shadow-[0_0_20px_#00f2fe] animate-pulse pointer-events-none flex items-center justify-center">
+            <div className="w-1 h-12 bg-cyan-200 rounded-full shadow-[0_0_10px_#00f2fe]" />
+          </div>
+        )}
+
         {/* Operations Header inside Sidebar */}
         <div className="p-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
           <div className="flex items-center gap-2">
-            <RoleIcon className="w-4 h-4 text-blue-400" />
+            <RoleIcon className="w-4 h-4 text-cyan-400" />
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-300">
               Operations Menu
             </span>
@@ -114,13 +129,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 }}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                   isActive
-                    ? 'bg-blue-600/20 text-blue-400 border border-blue-500/40 font-semibold shadow-sm'
+                    ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 font-semibold shadow-[0_0_15px_rgba(0,240,255,0.2)]'
                     : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
                   <Icon
-                    className={`w-4 h-4 ${isActive ? 'text-blue-400' : 'text-slate-400'}`}
+                    className={`w-4 h-4 ${isActive ? 'text-cyan-400' : 'text-slate-400'}`}
                   />
                   <span>{item.label}</span>
                 </div>
@@ -138,11 +153,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="p-3 border-t border-slate-800 bg-slate-950/60 text-xs">
           <div className="flex items-center justify-between text-slate-400 mb-1">
             <span className="text-[11px]">Active Mode</span>
-            <span className="text-blue-400 font-bold uppercase text-[10px]">{userRole}</span>
+            <span className="text-cyan-400 font-bold uppercase text-[10px]">{userRole}</span>
           </div>
           <div className="flex items-center justify-between text-slate-500 text-[10px]">
-            <span>Version: v4.2 PROD</span>
-            <span className="text-emerald-400 font-semibold">Ready</span>
+            <span>NDMA Integrated Telemetry</span>
+            <span className="text-emerald-400 font-semibold">Active</span>
           </div>
         </div>
       </aside>

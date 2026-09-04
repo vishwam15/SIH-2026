@@ -190,7 +190,7 @@ export const KineticBackgroundCanvas: React.FC<KineticBackgroundCanvasProps> = (
         ctx.restore();
       });
 
-      // 6. Floating Antigravity Drones
+      // 6. Floating Telemetry Surveillance Drones
       drones.forEach((drone) => {
         drone.y = drone.baseY + Math.sin(time * 2 + drone.floatOffset) * 14;
 
