@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import type { PageId, MapZone, EmergencyAlert, SensorData, UserRole } from './types';
 import { DisasterShieldAPI } from './services/api';
+import { useLiveLocation } from './hooks/useLiveLocation';
 import { Navbar } from './components/common/Navbar';
 import { Sidebar } from './components/common/Sidebar';
 import { LandingPage } from './pages/LandingPage';
@@ -15,6 +16,53 @@ import { SafeRoutes } from './pages/SafeRoutes';
 import { Analytics } from './pages/Analytics';
 import { Settings } from './pages/Settings';
 import { LoginPage } from './pages/LoginPage';
+import { SignupPage } from './pages/SignupPage';
+
+const STORAGE_KEY = 'disastershield-users';
+const SESSION_KEY = 'disastershield-session';
+
+const sampleUsers: any[] = [
+  {
+    id: 'admin-1',
+    fullName: 'Aarav Nair',
+    email: 'admin@disastershield.gov',
+    password: 'admin123',
+    role: 'admin',
+    department: 'NDMA HQ',
+  },
+  {
+    id: 'authority-1',
+    fullName: 'Pragya Sinha',
+    email: 'authority@disastershield.gov',
+    password: 'authority123',
+    role: 'authority',
+    department: 'Disaster Authority',
+  },
+  {
+    id: 'response-1',
+    fullName: 'Karan Mehta',
+    email: 'response@disastershield.gov',
+    password: 'response123',
+    role: 'response',
+    department: 'Emergency Response',
+  },
+  {
+    id: 'field-1',
+    fullName: 'Ritika Joshi',
+    email: 'field@disastershield.gov',
+    password: 'field123',
+    role: 'field',
+    department: 'Field Operations',
+  },
+  {
+    id: 'citizen-1',
+    fullName: 'Suresh Kumar',
+    email: 'citizen@disastershield.in',
+    password: 'citizen123',
+    role: 'citizen',
+    department: 'Community Safety',
+  },
+];
 
 const pageToPath = (page: PageId): string => {
   switch (page) {
@@ -22,6 +70,8 @@ const pageToPath = (page: PageId): string => {
       return '/landingpage';
     case 'login':
       return '/login';
+    case 'signup':
+      return '/signup';
     case 'dashboard':
       return '/dashboard';
     case 'flood':
@@ -52,6 +102,8 @@ const getPageFromPath = (pathname: string): PageId => {
       return 'landing';
     case '/login':
       return 'login';
+    case '/signup':
+      return 'signup';
     case '/dashboard':
       return 'dashboard';
     case '/flood':
@@ -80,6 +132,17 @@ export const App: React.FC = () => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isSimulatingLive, setIsSimulatingLive] = useState(true);
+  const [users, setUsers] = useState<any[]>(() => {
+    if (typeof window === 'undefined') return sampleUsers;
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : sampleUsers;
+  });
+  const [currentUser, setCurrentUser] = useState<any | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const saved = window.sessionStorage.getItem(SESSION_KEY);
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [userRole, setUserRole] = useState<UserRole>('authority');
   const [userEmail, setUserEmail] = useState<string>('officer.authority@sih2026.gov');
 
@@ -92,6 +155,54 @@ export const App: React.FC = () => {
   const [aiPredictions, setAiPredictions] = useState<any[]>([]);
   const [safeRoutes, setSafeRoutes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [liveLocations, setLiveLocations] = useState<any[]>([]);
+  const [activeSos, setActiveSos] = useState<any[]>([]);
+  const liveSocketRef = useRef<any>(null);
+
+  const handleLocationUpdate = useCallback((payload: any) => {
+    setUserLocation({ lat: payload.lat, lng: payload.lng });
+    setLiveLocations((prev) => {
+      const filtered = prev.filter((item) => item.userId !== payload.userId);
+      return [...filtered, { ...payload, id: payload.userId }];
+    });
+  }, []);
+
+  const handleSosTriggered = useCallback((payload: any) => {
+    if (!payload) return;
+    setActiveSos((prev) => {
+      const filtered = prev.filter((item) => item.userId !== payload.userId);
+      return [...filtered, payload];
+    });
+  }, []);
+
+  const handleSocketReady = useCallback((socket: any) => {
+    liveSocketRef.current = socket;
+  }, []);
+
+  useLiveLocation({
+    userId: currentUser?.id || 'guest-user',
+    role: currentUser?.role || userRole,
+    enabled: Boolean(currentUser),
+    onLocationUpdate: handleLocationUpdate,
+    onSosTriggered: handleSosTriggered,
+    onSocketReady: handleSocketReady,
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+    }
+  }, [users]);
+
+  useEffect(() => {
+    if (currentUser && typeof window !== 'undefined') {
+      window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+      setUserRole(currentUser.role);
+      setUserEmail(currentUser.email);
+    } else if (typeof window !== 'undefined') {
+      window.sessionStorage.removeItem(SESSION_KEY);
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     const initData = async () => {
@@ -100,7 +211,6 @@ export const App: React.FC = () => {
           sData,
           zData,
           sensData,
-          aData,
           fMetrics,
           lMetrics,
           aiPreds,
@@ -109,7 +219,6 @@ export const App: React.FC = () => {
           DisasterShieldAPI.getDashboardStats(),
           DisasterShieldAPI.getMapZones(),
           DisasterShieldAPI.getSensors(),
-          DisasterShieldAPI.getAlerts(),
           DisasterShieldAPI.getFloodMetrics(),
           DisasterShieldAPI.getLandslideMetrics(),
           DisasterShieldAPI.getAIPredictions(),
@@ -119,7 +228,7 @@ export const App: React.FC = () => {
         setStats(sData);
         setZones(zData);
         setSensors(sensData);
-        setAlerts(aData);
+        setAlerts([]);
         setFloodMetrics(fMetrics);
         setLandslideMetrics(lMetrics);
         setAiPredictions(aiPreds);
@@ -186,9 +295,81 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleLoginSuccess = (role: UserRole, email: string) => {
-    setUserRole(role);
-    setUserEmail(email);
+  const handleLoginSuccess = (loggedUser: any) => {
+    setCurrentUser(loggedUser);
+    setUserRole(loggedUser.role);
+    setUserEmail(loggedUser.email);
+  };
+
+  const handleSignupSuccess = (newUser: any) => {
+    setUsers((prev) => [
+      ...prev,
+      {
+        id: `user-${Date.now()}`,
+        ...newUser,
+      },
+    ]);
+    setCurrentUser({ ...newUser, id: `user-${Date.now()}` });
+    setUserRole(newUser.role);
+    setUserEmail(newUser.email);
+  };
+
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported for this browser.');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const nextLocation = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        setUserLocation(nextLocation);
+        setCurrentUser((prev: any) => (prev ? { ...prev, location: nextLocation } : prev));
+      },
+      () => {
+        alert('Location access was denied. Use the map search or default sample location instead.');
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const handleCitizenSOS = () => {
+    const coordinates = userLocation || { lat: 19.076, lng: 72.8777 };
+    const payload = {
+      userId: currentUser?.id || 'citizen-demo',
+      role: 'citizen',
+      lat: coordinates.lat,
+      lng: coordinates.lng,
+      timestamp: new Date().toISOString(),
+      severity: 'CRITICAL',
+    };
+
+    if (liveSocketRef.current) {
+      liveSocketRef.current.emit('sos:triggered', payload);
+    }
+
+    setActiveSos((prev) => {
+      const filtered = prev.filter((item) => item.userId !== payload.userId);
+      return [payload, ...filtered];
+    });
+
+    const newAlert: EmergencyAlert = {
+      id: `sos-${Date.now()}`,
+      title: 'Citizen SOS Triggered',
+      type: 'SYSTEM',
+      severity: 'CRITICAL',
+      location: currentUser?.department || 'Citizen Zone',
+      coordinates,
+      probabilityPct: 100,
+      recommendedAction: 'Dispatch nearest responder team and emergency shelter support.',
+      timestamp: new Date().toISOString(),
+      acknowledged: false,
+      affectedPopulation: 120,
+    };
+    setAlerts((prev) => [newAlert, ...prev]);
   };
 
   const handleNavigate = (page: PageId) => {
@@ -198,7 +379,7 @@ export const App: React.FC = () => {
 
   const currentPage = getPageFromPath(location.pathname);
   const isLanding = currentPage === 'landing';
-  const isLogin = currentPage === 'login';
+  const isAuthPage = currentPage === 'login' || currentPage === 'signup';
 
   if (loading) {
     return (
@@ -216,7 +397,7 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-white">
-      {!isLanding && !isLogin && (
+      {!isLanding && !isAuthPage && (
         <Navbar
           currentPage={currentPage}
           onNavigate={handleNavigate}
@@ -226,12 +407,17 @@ export const App: React.FC = () => {
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
           userRole={userRole}
           userEmail={userEmail}
-          onLogout={() => handleNavigate('login')}
+          onLogout={() => {
+            setCurrentUser(null);
+            setUserRole('authority');
+            setUserEmail('officer.authority@sih2026.gov');
+            handleNavigate('login');
+          }}
         />
       )}
 
       <div className="flex-1 flex relative">
-        {!isLanding && !isLogin && (
+        {!isLanding && !isAuthPage && (
           <Sidebar
             currentPage={currentPage}
             onNavigate={handleNavigate}
@@ -244,7 +430,7 @@ export const App: React.FC = () => {
 
         <main
           className={`flex-1 w-full transition-all ${
-            isLanding || isLogin
+            isLanding || isAuthPage
               ? 'pl-0 pt-0 min-h-screen overflow-y-auto'
               : 'pl-0 lg:pl-6 pt-14 h-screen overflow-y-auto bg-slate-950'
           }`}
@@ -254,7 +440,11 @@ export const App: React.FC = () => {
             <Route path="/landingpage" element={<LandingPage onNavigate={handleNavigate} />} />
             <Route
               path="/login"
-              element={<LoginPage onLoginSuccess={handleLoginSuccess} onNavigate={handleNavigate} />}
+              element={<LoginPage users={users} onLoginSuccess={handleLoginSuccess} onNavigate={handleNavigate} />}
+            />
+            <Route
+              path="/signup"
+              element={<SignupPage users={users} onSignupSuccess={handleSignupSuccess} onNavigate={handleNavigate} />}
             />
             <Route
               path="/dashboard"
@@ -267,6 +457,12 @@ export const App: React.FC = () => {
                   onNavigate={handleNavigate}
                   onSelectZone={handleSelectZone}
                   userRole={userRole}
+                  userName={currentUser?.fullName || userEmail}
+                  userLocation={userLocation}
+                  liveLocations={liveLocations}
+                  activeSos={activeSos}
+                  onUseMyLocation={handleUseMyLocation}
+                  onTriggerSOS={handleCitizenSOS}
                 />
               }
             />

@@ -56,11 +56,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             onClick={() => onNavigate('landing')}
             className="flex items-center gap-3 cursor-pointer group"
           >
-            <div className="relative w-11 h-11 rounded-2xl bg-gradient-to-tr from-cyan-400 via-purple-500 to-rose-500 p-[2px] shadow-[0_0_25px_rgba(0,240,255,0.4)] group-hover:scale-105 transition-transform">
-              <div className="w-full h-full bg-black rounded-[14px] flex items-center justify-center relative overflow-hidden">
-                <Shield className="w-5 h-5 text-cyan-400 animate-pulse" />
-              </div>
-            </div>
+            <img
+              src="/SIHLOGO.png"
+              alt="SIH Logo"
+              className="w-11 h-11 rounded-2xl object-cover border border-cyan-500/40 bg-black shadow-[0_0_25px_rgba(0,240,255,0.4)] group-hover:scale-105 transition-transform"
+            />
             <span className="font-display font-black text-2xl tracking-tight text-white flex items-center">
               DISASTER<span className="text-cyan-400 drop-shadow-[0_0_12px_rgba(0,240,255,0.8)]">SHIELD</span>
               <span className="ml-1 text-xs px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono">AI</span>

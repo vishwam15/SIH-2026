@@ -17,6 +17,7 @@ import {
   Building2,
   Truck,
   Wrench,
+  UserRound,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -62,6 +63,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         return Truck;
       case 'field':
         return Wrench;
+      case 'citizen':
+        return UserRound;
       default:
         return Shield;
     }

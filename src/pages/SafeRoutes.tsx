@@ -48,6 +48,28 @@ export const SafeRoutes: React.FC<SafeRoutesProps> = ({ routes }) => {
         </div>
       </div>
 
+      {selectedRoute && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="glass-panel p-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/10">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-300 mb-2">Citizen Safety Status</p>
+            <div className="text-2xl font-black text-white">{selectedRoute.status}</div>
+            <p className="text-[11px] text-slate-300 mt-1">Route viability based on current hazard layers</p>
+          </div>
+
+          <div className="glass-panel p-4 rounded-2xl border border-cyan-500/20 bg-cyan-500/10">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-cyan-300 mb-2">Estimated Travel</p>
+            <div className="text-2xl font-black text-white">{selectedRoute.estimatedTimeMin} min</div>
+            <p className="text-[11px] text-slate-300 mt-1">Time to the nearest safety point</p>
+          </div>
+
+          <div className="glass-panel p-4 rounded-2xl border border-rose-500/20 bg-rose-500/10">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-rose-300 mb-2">Emergency Contact</p>
+            <div className="text-base font-black text-white">112 / NDMA Helpdesk</div>
+            <p className="text-[11px] text-slate-300 mt-1">Use during active flooding or landslide watch</p>
+          </div>
+        </div>
+      )}
+
       {/* Main Grid: Interactive Route Map (Col 8) & Route Details Checklist (Col 4) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Leaflet Safe Route Map (Col 8) */}

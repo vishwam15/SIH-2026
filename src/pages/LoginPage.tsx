@@ -15,16 +15,18 @@ import {
 } from 'lucide-react';
 
 interface LoginPageProps {
-  onLoginSuccess: (role: UserRole, email: string) => void;
-  onNavigate: (page: PageId) => void;
+  users: any[];
+  onLoginSuccess: (user: any) => void;
+  onNavigate: (page: PageId | 'signup') => void;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ users, onLoginSuccess, onNavigate }) => {
   const [selectedRole, setSelectedRole] = useState<UserRole>('authority');
-  const [email, setEmail] = useState('officer.authority@sih2026.gov');
-  const [password, setPassword] = useState('••••••••••••');
+  const [email, setEmail] = useState('authority@disastershield.gov');
+  const [password, setPassword] = useState('authority123');
   const [securityToken, setSecurityToken] = useState('SEC-CLEARANCE-99482');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loginError, setLoginError] = useState('');
 
   const roles: {
     id: UserRole;
@@ -66,6 +68,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate
       levelBadge: 'LEVEL 1 — IOT TELEMETRY MAINTAINER',
       levelColor: 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10',
     },
+    {
+      id: 'citizen',
+      title: 'Citizen',
+      icon: ShieldAlert,
+      description: 'Receives public warnings, checks safe evacuation routes, and tracks neighborhood hazard status.',
+      levelBadge: 'LEVEL 0 — COMMUNITY SAFETY ACCESS',
+      levelColor: 'text-amber-400 border-amber-500/40 bg-amber-500/10',
+    },
   ];
 
   const activeRoleConfig = roles.find((r) => r.id === selectedRole) || roles[1];
@@ -74,12 +84,35 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setLoginError('');
+
+    const matchedUser = users.find(
+      (user) =>
+        user.email.toLowerCase() === email.toLowerCase() &&
+        user.password === password &&
+        user.role === selectedRole
+    );
 
     setTimeout(() => {
       setIsSubmitting(false);
-      onLoginSuccess(selectedRole, email);
+
+      if (!matchedUser) {
+        const fallbackUser = users.find(
+          (user) => user.email.toLowerCase() === email.toLowerCase() && user.password === password
+        );
+
+        if (fallbackUser) {
+          setLoginError('This account belongs to a different role. Please choose the correct role.');
+          return;
+        }
+
+        setLoginError('Invalid credentials. Use a valid saved user or create a new account.');
+        return;
+      }
+
+      onLoginSuccess(matchedUser);
       onNavigate('dashboard');
-    }, 700);
+    }, 500);
   };
 
   return (
@@ -100,7 +133,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate
         </button>
 
         <div className="flex items-center gap-2">
-          <ShieldAlert className="w-5 h-5 text-emerald-400" />
+          <img src="/SIHLOGO.png" alt="SIH Logo" className="w-8 h-8 rounded-lg object-cover border border-emerald-500/20 bg-slate-900" />
           <span className="text-sm font-black text-white font-display">
             Disaster<span className="text-emerald-400">Shield</span> AI
           </span>
@@ -114,8 +147,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate
           <p className="text-xs text-slate-400">Select active command role to generate access token</p>
         </div>
 
-        {/* Dynamic Security Clearance Badge */}
-        <div className="text-center">
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => onNavigate('signup')}
+            className="text-[10px] font-bold uppercase tracking-wider text-emerald-300 hover:text-white transition"
+          >
+            Create Account
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Clearance Level</span>
           <span
             className={`inline-block px-3.5 py-1 rounded-full text-[10px] font-extrabold tracking-wider uppercase border ${activeRoleConfig.levelColor}`}
           >
@@ -211,6 +254,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate
                 className="w-full bg-slate-950 border border-emerald-500/50 rounded-xl px-3 py-2.5 text-xs font-mono text-emerald-300 placeholder-slate-600 focus:outline-none focus:border-emerald-400"
                 placeholder="SEC-CLEARANCE-XXXXX"
               />
+            </div>
+          )}
+
+          {loginError && (
+            <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-[11px] text-rose-200">
+              {loginError}
             </div>
           )}
 

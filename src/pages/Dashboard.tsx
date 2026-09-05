@@ -10,6 +10,8 @@ import type {
 import { StatCard } from '../components/common/StatCard';
 import { QuickAlertsTicker } from '../components/dashboard/QuickAlertsTicker';
 import { MultiHazardMap } from '../components/maps/MultiHazardMap';
+import { CitizenSafetyOverlay } from '../components/maps/CitizenSafetyOverlay';
+import { LiveGISMap } from '../components/LiveGISMap';
 import { RiskBadge } from '../components/common/RiskBadge';
 import {
   Waves,
@@ -34,16 +36,28 @@ interface DashboardProps {
   onNavigate: (page: PageId) => void;
   onSelectZone: (zone: MapZone) => void;
   userRole?: UserRole;
+  userName?: string;
+  userLocation?: { lat: number; lng: number } | null;
+  liveLocations?: any[];
+  activeSos?: any[];
+  onUseMyLocation?: () => void;
+  onTriggerSOS?: () => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
-  stats: _stats,
+  stats,
   zones,
   sensors,
   alerts,
   onNavigate,
   onSelectZone,
   userRole = 'authority',
+  userName,
+  userLocation,
+  liveLocations = [],
+  activeSos = [],
+  onUseMyLocation,
+  onTriggerSOS,
 }) => {
   const criticalZones = zones.filter(
     (z) => z.riskLevel === 'CRITICAL' || z.riskLevel === 'HIGH'
@@ -59,6 +73,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
         return 'Emergency Response Team';
       case 'field':
         return 'Field Maintenance Officer';
+      case 'citizen':
+        return 'Citizen Safety Viewer';
       default:
         return 'Disaster Authority';
     }
@@ -164,11 +180,79 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </button>
             </>
           )}
+
+          {userRole === 'citizen' && (
+            <>
+              <button
+                onClick={() => onNavigate('alerts')}
+                className="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-600/30 transition flex items-center gap-1.5"
+              >
+                <Bell className="w-4 h-4" /> Public Alerts
+              </button>
+              <button
+                onClick={() => onNavigate('routes')}
+                className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5"
+              >
+                <Navigation className="w-4 h-4" /> Evacuation Routes
+              </button>
+            </>
+          )}
         </div>
       </div>
 
       {/* Quick Alert Banner */}
       <QuickAlertsTicker alerts={alerts} onViewAllAlerts={() => onNavigate('alerts')} />
+
+      {userRole === 'citizen' && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="glass-panel p-4 rounded-2xl border border-amber-500/20 bg-amber-500/10">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300">My Risk Area</span>
+              <ShieldAlert className="w-4 h-4 text-amber-300" />
+            </div>
+            <div className="text-2xl font-black text-white">{Math.round(stats?.floodRiskPct ?? 54)}%</div>
+            <p className="text-[11px] text-slate-300 mt-1">
+              {userName ? `Welcome ${userName.split(' ')[0]}` : 'Flood risk in your local sector'}
+            </p>
+            {userLocation && (
+              <p className="text-[10px] mt-2 text-slate-400">
+                Live: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+              </p>
+            )}
+          </div>
+
+          <div className="glass-panel p-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/10">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-300">Nearest Safe Shelter</span>
+              <Navigation className="w-4 h-4 text-emerald-300" />
+            </div>
+            <div className="text-base font-black text-white">Community Relief Center</div>
+            <p className="text-[11px] text-slate-300 mt-1">2.4 km • 14 mins via safe route</p>
+            {onUseMyLocation && (
+              <button
+                onClick={onUseMyLocation}
+                className="mt-3 w-full px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold transition"
+              >
+                Use My Location
+              </button>
+            )}
+          </div>
+
+          <div className="glass-panel p-4 rounded-2xl border border-rose-500/20 bg-rose-500/10">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-rose-300">Emergency SOS</span>
+              <Bell className="w-4 h-4 text-rose-300" />
+            </div>
+            <button
+              onClick={() => (onTriggerSOS ? onTriggerSOS() : onNavigate('routes'))}
+              className="w-full px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition"
+            >
+              Trigger Safety Check
+            </button>
+            <p className="text-[11px] text-slate-300 mt-2">Broadcast alert to nearby responders</p>
+          </div>
+        </div>
+      )}
 
       {/* STEP 3: 4 KPI Stat Cards Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -229,12 +313,32 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </span>
         </div>
 
-        <MultiHazardMap
-          zones={zones}
-          sensors={sensors}
-          onSelectLocation={onSelectZone}
-          height="540px"
-        />
+        <div className="relative">
+          {userRole === 'citizen' || userRole === 'authority' || userRole === 'field' ? (
+            <LiveGISMap
+              userRole={userRole}
+              currentUserLocation={userLocation}
+              liveLocations={liveLocations}
+              activeSos={activeSos}
+            />
+          ) : (
+            <MultiHazardMap
+              zones={zones}
+              sensors={sensors}
+              onSelectLocation={onSelectZone}
+              height="540px"
+            />
+          )}
+
+          {userRole === 'citizen' && (
+            <CitizenSafetyOverlay
+              onTriggerSOS={() => onNavigate('alerts')}
+              shelterName="Community Relief Center"
+              distanceKm={2.4}
+              travelMinutes={14}
+            />
+          )}
+        </div>
       </div>
 
       {/* Bottom Grid: Sector Priority Table & Sensor Live Stream */}
