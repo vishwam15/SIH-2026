@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import type { PageId, MapZone, EmergencyAlert, SensorData, UserRole } from './types';
 import { DisasterShieldAPI } from './services/api';
 import { Navbar } from './components/common/Navbar';
@@ -14,11 +14,42 @@ import { SafeRoutes } from './pages/SafeRoutes';
 import { Analytics } from './pages/Analytics';
 import { Settings } from './pages/Settings';
 import { LoginPage } from './pages/LoginPage';
+import { FloodEvacuationChatbot } from './components/ai/FloodEvacuationChatbot';
+
+const VALID_PAGES: PageId[] = [
+  'landing',
+  'login',
+  'dashboard',
+  'flood',
+  'landslide',
+  'ai-prediction',
+  'sensors',
+  'alerts',
+  'routes',
+  'analytics',
+  'settings',
+];
+
+const getPageFromHash = (hash: string): PageId => {
+  const cleanHash = hash.replace(/^#\/?/, '').split('?')[0] as PageId;
+  return VALID_PAGES.includes(cleanHash) ? cleanHash : 'landing';
+};
 
 export const App: React.FC = () => {
-  // STEP 1 -> STEP 2 -> STEP 3 Page State
-  const [currentPage, setCurrentPage] = useState<PageId>('landing');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Procedural Page State initialized from current URL hash
+  const [currentPage, setCurrentPage] = useState<PageId>(() => {
+    if (typeof window !== 'undefined') {
+      return getPageFromHash(window.location.hash);
+    }
+    return 'landing';
+  });
+
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 1024;
+    }
+    return true;
+  });
   const [isSimulatingLive, setIsSimulatingLive] = useState(true);
   const [userRole, setUserRole] = useState<UserRole>('authority');
   const [userEmail, setUserEmail] = useState<string>('officer.authority@sih2026.gov');
@@ -33,6 +64,61 @@ export const App: React.FC = () => {
   const [aiPredictions, setAiPredictions] = useState<any[]>([]);
   const [safeRoutes, setSafeRoutes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Procedural History-Aware Navigation
+  const navigateTo = useCallback((newPage: PageId, replace: boolean = false) => {
+    if (newPage === currentPage && window.location.hash === `#${newPage}`) return;
+
+    if (replace) {
+      window.history.replaceState({ page: newPage }, '', `#${newPage}`);
+    } else {
+      window.history.pushState({ page: newPage }, '', `#${newPage}`);
+    }
+
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
+
+  const handleGoBack = useCallback(() => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      navigateTo('landing');
+    }
+  }, [navigateTo]);
+
+  // Synchronize with browser Back and Forward history buttons
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      if (e.state && e.state.page && VALID_PAGES.includes(e.state.page)) {
+        setCurrentPage(e.state.page);
+      } else {
+        const pageFromUrl = getPageFromHash(window.location.hash);
+        setCurrentPage(pageFromUrl);
+      }
+    };
+
+    const handleHashChange = () => {
+      const pageFromUrl = getPageFromHash(window.location.hash);
+      setCurrentPage((prev) => (prev !== pageFromUrl ? pageFromUrl : prev));
+    };
+
+    // Ensure URL has appropriate hash state
+    const currentHashPage = getPageFromHash(window.location.hash);
+    if (!window.location.hash || !VALID_PAGES.includes(currentHashPage)) {
+      window.history.replaceState({ page: 'landing' }, '', '#landing');
+    } else {
+      window.history.replaceState({ page: currentHashPage }, '', `#${currentHashPage}`);
+    }
+
+    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('hashchange', handleHashChange);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
 
   // Initial Telemetry Data Loading
   useEffect(() => {
@@ -76,45 +162,44 @@ export const App: React.FC = () => {
     initData();
   }, []);
 
-  // Live Stream Telemetry Fluctuations
+  // Live Stream Telemetry Refresh
   useEffect(() => {
     if (!isSimulatingLive) return;
 
-    const interval = setInterval(() => {
-      setStats((prevStats: any) => {
-        if (!prevStats) return prevStats;
-        const deltaRain = (Math.random() - 0.45) * 1.5;
-        const newRain = Math.max(20, Math.min(120, +(prevStats.currentRainfallMmHr + deltaRain).toFixed(1)));
-        return {
-          ...prevStats,
-          currentRainfallMmHr: newRain,
-        };
-      });
+    const interval = setInterval(async () => {
+      try {
+        const [
+          sData,
+          zData,
+          sensData,
+          aData,
+          fMetrics,
+          lMetrics,
+          aiPreds,
+          sRoutes,
+        ] = await Promise.all([
+          DisasterShieldAPI.getDashboardStats(),
+          DisasterShieldAPI.getMapZones(),
+          DisasterShieldAPI.getSensors(),
+          DisasterShieldAPI.getAlerts(),
+          DisasterShieldAPI.getFloodMetrics(),
+          DisasterShieldAPI.getLandslideMetrics(),
+          DisasterShieldAPI.getAIPredictions(),
+          DisasterShieldAPI.getSafeRoutes(),
+        ]);
 
-      setFloodMetrics((prevMetrics: any) => {
-        if (!prevMetrics) return prevMetrics;
-        const deltaWater = (Math.random() - 0.48) * 0.05;
-        const newWater = Math.max(0.5, Math.min(3.0, +(prevMetrics.waterLevelM + deltaWater).toFixed(2)));
-        return {
-          ...prevMetrics,
-          waterLevelM: newWater,
-        };
-      });
-
-      setSensors((prevSensors) =>
-        prevSensors.map((sensor) => {
-          if (sensor.type === 'Rain Gauge') {
-            const val = +(70 + Math.random() * 30).toFixed(1);
-            return { ...sensor, latestReading: `${val} mm/hr`, lastUpdated: 'Just now' };
-          }
-          if (sensor.type === 'Water Level') {
-            const val = +(1.8 + Math.random() * 0.4).toFixed(2);
-            return { ...sensor, latestReading: `${val} meters`, lastUpdated: 'Just now' };
-          }
-          return { ...sensor, lastUpdated: 'Just now' };
-        })
-      );
-    }, 2500);
+        setStats(sData);
+        setZones(zData);
+        setSensors(sensData);
+        setAlerts(aData);
+        setFloodMetrics(fMetrics);
+        setLandslideMetrics(lMetrics);
+        setAiPredictions(aiPreds);
+        setSafeRoutes(sRoutes);
+      } catch (err) {
+        console.error('Live data sync failed:', err);
+      }
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [isSimulatingLive]);
@@ -127,11 +212,11 @@ export const App: React.FC = () => {
 
   const handleSelectZone = (zone: MapZone) => {
     if (zone.type === 'flood') {
-      setCurrentPage('flood');
+      navigateTo('flood');
     } else if (zone.type === 'landslide') {
-      setCurrentPage('landslide');
+      navigateTo('landslide');
     } else {
-      setCurrentPage('sensors');
+      navigateTo('sensors');
     }
   };
 
@@ -155,56 +240,56 @@ export const App: React.FC = () => {
   const activeAlertCount = alerts.filter((a) => !a.acknowledged).length;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-white">
-      {/* 1. Header Bar (h-14 bg-slate-900/90 border-b border-slate-800 fixed top-0 left-0 right-0 z-50 px-4) */}
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-cyan-500 selection:text-white">
+      {/* 1. Header Bar */}
       {currentPage !== 'landing' && currentPage !== 'login' && (
         <Navbar
           currentPage={currentPage}
-          onNavigate={(p) => {
-            setCurrentPage(p);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
+          onNavigate={navigateTo}
+          onGoBack={handleGoBack}
+          canGoBack={true}
           activeAlertCount={activeAlertCount}
           isSimulatingLive={isSimulatingLive}
           onToggleSimulateLive={() => setIsSimulatingLive(!isSimulatingLive)}
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          sidebarOpen={sidebarOpen}
           userRole={userRole}
           userEmail={userEmail}
-          onLogout={() => setCurrentPage('login')}
+          onLogout={() => navigateTo('login')}
         />
       )}
 
       {/* Main Layout Area */}
       <div className="flex-1 flex relative">
-        {/* 2. Persistent Left Sidebar (w-64 fixed top-14 left-0 bottom-0 bg-slate-900 border-r border-slate-800 p-4) */}
+        {/* 2. Docked Left Sidebar */}
         {currentPage !== 'landing' && currentPage !== 'login' && (
           <Sidebar
             currentPage={currentPage}
-            onNavigate={(p) => {
-              setCurrentPage(p);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
+            onNavigate={navigateTo}
             isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
+            onToggle={() => setSidebarOpen((prev) => !prev)}
             activeAlertCount={activeAlertCount}
             userRole={userRole}
           />
         )}
 
-        {/* 3. Main Content Panel (pl-6 pt-14 flex-1 h-screen overflow-y-auto bg-slate-950) */}
+        {/* 3. Main Content Panel (Offset dynamically by sidebar on desktop to avoid any overlap) */}
         <main
-          className={`flex-1 w-full transition-all ${
+          className={`flex-1 w-full transition-[padding] duration-300 ease-in-out ${
             currentPage === 'landing' || currentPage === 'login'
-              ? 'pl-0 pt-0 min-h-screen overflow-y-auto'
-              : 'pl-0 lg:pl-6 pt-14 h-screen overflow-y-auto bg-slate-950'
+              ? 'pt-0 min-h-screen overflow-y-auto'
+              : `pt-14 h-screen overflow-y-auto bg-slate-950 ${
+                  sidebarOpen ? 'lg:pl-64' : 'lg:pl-0'
+                }`
           }`}
         >
-          {currentPage === 'landing' && <LandingPage onNavigate={setCurrentPage} />}
+          {currentPage === 'landing' && <LandingPage onNavigate={navigateTo} />}
 
           {currentPage === 'login' && (
             <LoginPage
               onLoginSuccess={handleLoginSuccess}
-              onNavigate={setCurrentPage}
+              onNavigate={navigateTo}
             />
           )}
 
@@ -214,18 +299,18 @@ export const App: React.FC = () => {
               zones={zones}
               sensors={sensors}
               alerts={alerts}
-              onNavigate={setCurrentPage}
+              onNavigate={navigateTo}
               onSelectZone={handleSelectZone}
               userRole={userRole}
             />
           )}
 
           {currentPage === 'flood' && (
-            <FloodIntelligence metrics={floodMetrics} onNavigate={setCurrentPage} />
+            <FloodIntelligence metrics={floodMetrics} onNavigate={navigateTo} />
           )}
 
           {currentPage === 'landslide' && (
-            <LandslideIntelligence metrics={landslideMetrics} onNavigate={setCurrentPage} />
+            <LandslideIntelligence metrics={landslideMetrics} onNavigate={navigateTo} />
           )}
 
           {currentPage === 'ai-prediction' && <AIPrediction predictions={aiPredictions} />}
@@ -243,6 +328,9 @@ export const App: React.FC = () => {
           {currentPage === 'settings' && <Settings />}
         </main>
       </div>
+
+      {/* Floating AI Chatbot for Flood & Evacuation Questions */}
+      <FloodEvacuationChatbot onNavigatePage={(pageId) => navigateTo(pageId as any)} />
     </div>
   );
 };

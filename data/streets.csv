@@ -1,0 +1,16 @@
+node_a,node_b,name,length_m
+MH_ANDHERI_3,MH_ANDHERI_1,Andheri Subway Arterial Road,450.0
+MH_ANDHERI_1,MH_MILAN_1,Milan Subway Direct Expressway,2800.0
+MH_MILAN_1,MH_SHELTER_BANDRA,Bandra Carter Road Approach,2200.0
+MH_ANDHERI_3,MH_ANDHERI_2,SV Road Flyover Link,450.0
+MH_ANDHERI_2,MH_MILAN_2,Western Express Highway Elevated,2700.0
+MH_MILAN_2,MH_BANDRA_REC,Santacruz-Bandra Elevated Corridor,2400.0
+MH_BANDRA_REC,MH_SHELTER_BANDRA,Bandra Shelter Access Boulevard,600.0
+MH_ANDHERI_3,MH_BKC_1,Santacruz-Chembur Link Road (SCLR),3800.0
+MH_BKC_1,MH_DHARAVI_1,BKC Connector Flyover,2100.0
+MH_BKC_1,MH_BANDRA_REC,Bandra Reclamation Coastal Highway,2600.0
+MH_DHARAVI_1,MH_BANDRA_REC,Mahim Causeway Elevated Passage,1700.0
+MH_ANDHERI_1,MH_ANDHERI_2,Gokhale Bridge Crosslink,600.0
+MH_MILAN_1,MH_MILAN_2,Milan Flyover High Bypass,500.0
+MH_BKC_1,MH_KURLA_1,Kurla Mithi Approach Road,900.0
+MH_KURLA_1,MH_DHARAVI_1,Sion-Bandra Link Road,1600.0

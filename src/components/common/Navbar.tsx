@@ -6,6 +6,7 @@ import {
   User,
   Radio,
   Menu,
+  ChevronLeft,
   Volume2,
   VolumeX,
   LogOut,
@@ -14,22 +15,28 @@ import {
 interface NavbarProps {
   currentPage: PageId;
   onNavigate: (page: PageId) => void;
+  onGoBack?: () => void;
+  canGoBack?: boolean;
   activeAlertCount: number;
   isSimulatingLive: boolean;
   onToggleSimulateLive: () => void;
   onToggleSidebar?: () => void;
+  sidebarOpen?: boolean;
   userRole?: UserRole;
   userEmail?: string;
   onLogout?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
-  currentPage: _currentPage,
+  currentPage,
   onNavigate,
+  onGoBack,
+  canGoBack = false,
   activeAlertCount,
   isSimulatingLive,
   onToggleSimulateLive,
   onToggleSidebar,
+  sidebarOpen = true,
   userRole = 'authority',
   userEmail,
   onLogout,
@@ -51,21 +58,65 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
   };
 
+  const getPageTitle = (page: PageId) => {
+    switch (page) {
+      case 'dashboard':
+        return 'Command Dashboard';
+      case 'flood':
+        return 'Urban Flood Center';
+      case 'landslide':
+        return 'Landslide Center';
+      case 'ai-prediction':
+        return 'AI Risk Engine';
+      case 'sensors':
+        return 'IoT Sensor Network';
+      case 'alerts':
+        return 'Emergency Alerts';
+      case 'routes':
+        return 'Safe Routes System';
+      case 'analytics':
+        return 'Historical Analytics';
+      case 'settings':
+        return 'System Settings';
+      case 'login':
+        return 'Role Login';
+      default:
+        return 'Overview';
+    }
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-14 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 flex items-center justify-between">
-      {/* Left: Brand Logo & Hamburger */}
-      <div className="flex items-center gap-3">
+      {/* Left: Brand Logo, Back Button & Sidebar Toggle */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* Sidebar Toggle Hamburger (Desktop & Mobile) */}
         <button
           onClick={onToggleSidebar}
-          className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
-          title="Toggle Navigation Menu"
+          className={`p-1.5 rounded-lg border transition ${
+            sidebarOpen
+              ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40 shadow-[0_0_10px_rgba(0,240,255,0.2)]'
+              : 'bg-slate-800 text-slate-400 hover:text-white border-slate-700/80 hover:bg-slate-700'
+          }`}
+          title={sidebarOpen ? 'Hide Navigation Sidebar' : 'Show Navigation Sidebar'}
         >
           <Menu className="w-5 h-5" />
         </button>
 
+        {/* Procedural Back Button */}
+        {canGoBack && onGoBack && (
+          <button
+            onClick={onGoBack}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold text-slate-300 hover:text-white bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700/80 transition shadow-sm"
+            title="Go Back to Previous Page"
+          >
+            <ChevronLeft className="w-4 h-4 text-cyan-400" />
+            <span className="hidden sm:inline">Back</span>
+          </button>
+        )}
+
         <div
           onClick={() => onNavigate('landing')}
-          className="flex items-center gap-2.5 cursor-pointer group"
+          className="flex items-center gap-2.5 cursor-pointer group ml-1"
         >
           <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
             <ShieldAlert className="w-4 h-4 text-white" />
@@ -74,17 +125,25 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500" />
             </span>
           </div>
-          <div>
+          <div className="hidden sm:block">
             <div className="flex items-center gap-1.5">
               <span className="text-base font-black tracking-tight text-white font-display">
-                Disaster<span className="text-blue-400">Shield</span> AI
+                Disaster<span className="text-cyan-400">Shield</span> AI
               </span>
-              <span className="hidden sm:inline-block px-1.5 py-0.2 text-[9px] font-extrabold uppercase rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
+              <span className="hidden md:inline-block px-1.5 py-0.2 text-[9px] font-extrabold uppercase rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
                 SIH 2026
               </span>
             </div>
           </div>
         </div>
+
+        {/* Current Active Page Breadcrumb */}
+        {currentPage !== 'landing' && (
+          <div className="hidden xl:flex items-center gap-1.5 pl-3 border-l border-slate-800 text-xs">
+            <span className="text-slate-500">/</span>
+            <span className="font-bold text-cyan-400">{getPageTitle(currentPage)}</span>
+          </div>
+        )}
       </div>
 
       {/* Center: System Status Indicator Bar */}
@@ -142,7 +201,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Role Profile & Login/Logout Action */}
         <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
-          <div className="w-7 h-7 rounded-lg bg-slate-800 border border-blue-500/40 flex items-center justify-center text-blue-400">
+          <div className="w-7 h-7 rounded-lg bg-slate-800 border border-cyan-500/40 flex items-center justify-center text-cyan-400">
             <User className="w-3.5 h-3.5" />
           </div>
           <div className="text-left hidden lg:block">

@@ -12,6 +12,7 @@ import {
   Settings,
   Home,
   X,
+  ChevronLeft,
   LogIn,
   Shield,
   Building2,
@@ -24,6 +25,7 @@ interface SidebarProps {
   onNavigate: (page: PageId) => void;
   isOpen: boolean;
   onClose: () => void;
+  onToggle?: () => void;
   activeAlertCount: number;
   userRole?: UserRole;
 }
@@ -36,8 +38,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeAlertCount,
   userRole = 'authority',
 }) => {
-  const [isHovered, setIsHovered] = React.useState(false);
-
   const menuItems: { id: PageId; label: string; icon: any; badge?: number; roleAllowed?: UserRole[] }[] = [
     { id: 'landing', label: 'Overview Landing', icon: Home },
     { id: 'dashboard', label: 'Command Dashboard', icon: LayoutDashboard },
@@ -68,36 +68,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const RoleIcon = getRoleIcon();
-  const isExpanded = isOpen || isHovered;
+
+  const handleItemClick = (pageId: PageId) => {
+    onNavigate(pageId);
+    // On small screens, close mobile drawer after navigation
+    if (window.innerWidth < 1024) {
+      onClose();
+    }
+  };
 
   return (
     <>
-      {/* Mobile Backdrop Overlay */}
+      {/* Mobile Backdrop Overlay (only on mobile screens < lg) */}
       {isOpen && (
         <div
           onClick={onClose}
-          className="fixed inset-0 z-30 bg-black/70 backdrop-blur-sm lg:hidden transition-opacity"
+          className="fixed inset-0 top-14 z-30 bg-black/70 backdrop-blur-sm lg:hidden transition-opacity"
         />
       )}
 
-      {/* Auto-Hiding Hover Left Sidebar */}
+      {/* Persistent Docked Sidebar (Desktop) / Slide-over Drawer (Mobile) */}
       <aside
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        style={{
-          transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-        }}
-        className={`w-64 fixed left-0 top-14 bottom-0 z-40 bg-slate-900/95 border-r border-slate-800 backdrop-blur-xl flex flex-col shadow-[0_0_30px_rgba(0,0,0,0.8)] ${
-          isExpanded ? 'translate-x-0' : '-translate-x-[90%]'
+        className={`w-64 fixed left-0 top-14 bottom-0 z-40 bg-slate-900 border-r border-slate-800 backdrop-blur-xl flex flex-col shadow-2xl transition-transform duration-300 ease-in-out ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        {/* Glow Trigger Zone Indicator on Left Viewport Edge when Collapsed */}
-        {!isExpanded && (
-          <div className="absolute right-0 top-0 bottom-0 w-2 bg-gradient-to-b from-cyan-400 via-blue-500 to-teal-400 shadow-[0_0_20px_#00f2fe] animate-pulse pointer-events-none flex items-center justify-center">
-            <div className="w-1 h-12 bg-cyan-200 rounded-full shadow-[0_0_10px_#00f2fe]" />
-          </div>
-        )}
-
         {/* Operations Header inside Sidebar */}
         <div className="p-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
           <div className="flex items-center gap-2">
@@ -108,9 +103,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="lg:hidden text-slate-400 hover:text-white p-1 rounded-lg"
+            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
+            title="Collapse Sidebar"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4 lg:hidden" />
+            <ChevronLeft className="w-4 h-4 hidden lg:block" />
           </button>
         </div>
 
@@ -123,10 +120,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             return (
               <button
                 key={item.id}
-                onClick={() => {
-                  onNavigate(item.id);
-                  onClose();
-                }}
+                onClick={() => handleItemClick(item.id)}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                   isActive
                     ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 font-semibold shadow-[0_0_15px_rgba(0,240,255,0.2)]'

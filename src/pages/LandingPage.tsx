@@ -146,9 +146,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               )}
             </div>
 
-            <a href="#acquisition" className="text-cyan-400 hover:text-white transition-colors flex items-center gap-1.5 font-bold">
+            <button
+              onClick={() => {
+                const el = document.getElementById('acquisition');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="text-cyan-400 hover:text-white transition-colors flex items-center gap-1.5 font-bold bg-transparent border-none cursor-pointer"
+            >
               <Zap className="w-4 h-4" /> Acquisition Portal
-            </a>
+            </button>
           </nav>
 
           {/* Action Buttons */}

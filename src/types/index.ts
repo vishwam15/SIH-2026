@@ -130,4 +130,40 @@ export interface DashboardStats {
   totalSensors: number;
   activeAlertsCount: number;
   criticalAlertsCount: number;
+  temperatureC?: number;
+  humidityPct?: number;
+  windSpeedKmh?: number;
+  riverDischargeM3s?: number;
+  isLiveApi?: boolean;
+}
+
+export interface LiveTelemetryMesh {
+  source: string;
+  location: string;
+  timestamp: string;
+  is_live_stream: boolean;
+  weather: {
+    current_rainfall_mm_hr: number;
+    temperature_c: number;
+    humidity_pct: number;
+    wind_speed_kmh: number;
+    surface_pressure_hpa: number;
+    weather_condition: string;
+    nowcast_15min: { time: string; precipitation_mm: number }[];
+    hourly_forecast: { time: string; rainfall: number; threshold: number }[];
+  };
+  hydrology: {
+    river_discharge_m3s: number;
+    mithi_water_level_m: number;
+    tidal_level_m: number;
+    drainage_stress_pct: number;
+  };
+  geotechnical: {
+    soil_moisture_saturation_pct: number;
+    subsurface_moisture_pct: number;
+    rainfall_72h_accum_mm: number;
+    pore_water_pressure_kpa: number;
+    slope_factor_of_safety: number;
+    landslide_risk_level: RiskLevel;
+  };
 }

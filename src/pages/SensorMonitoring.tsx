@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
-import type { SensorData } from '../types';
+import React, { useState, useEffect } from 'react';
+import type { SensorData, LiveTelemetryMesh } from '../types';
+import { DisasterShieldAPI } from '../services/api';
 import {
   Radio,
   Battery,
   Search,
   X,
+  Globe,
+  Waves,
+  Droplets,
+  Mountain,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -26,8 +31,36 @@ export const SensorMonitoring: React.FC<SensorMonitoringProps> = ({
   const [selectedSensor, setSelectedSensor] = useState<SensorData | null>(null);
   const [filterType, setFilterType] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [liveMesh, setLiveMesh] = useState<LiveTelemetryMesh | null>(null);
 
-  const filteredSensors = sensors.filter((s) => {
+  useEffect(() => {
+    DisasterShieldAPI.getLiveTelemetryMesh()
+      .then((data) => setLiveMesh(data))
+      .catch(() => {});
+  }, []);
+
+  // Synthesize live internet/satellite telemetry sensor
+  const liveSensor: SensorData | null = liveMesh ? {
+    id: 'sensor-live-sat-01',
+    sensorId: 'SAT-MESH-01',
+    name: 'Open-Meteo & GloFAS Internet Mesh',
+    locationName: liveMesh.location || 'Mumbai Catchment (19.0760° N, 72.8777° E)',
+    coordinates: { lat: 19.0760, lng: 72.8777 },
+    type: 'Flood Sensor',
+    status: 'ONLINE',
+    batteryLevelPct: 100,
+    latestReading: `${liveMesh.weather.current_rainfall_mm_hr} mm/h | ${liveMesh.hydrology?.river_discharge_m3s} m³/s`,
+    lastUpdated: 'Live Just Now',
+    history: [
+      { timestamp: '12:00', value: liveMesh.weather.current_rainfall_mm_hr * 0.8 },
+      { timestamp: '13:00', value: liveMesh.weather.current_rainfall_mm_hr * 0.9 },
+      { timestamp: '14:00', value: liveMesh.weather.current_rainfall_mm_hr },
+    ],
+  } : null;
+
+  const allSensors = liveSensor ? [liveSensor, ...sensors] : sensors;
+
+  const filteredSensors = allSensors.filter((s) => {
     const matchesType = filterType === 'all' || s.type.toLowerCase().includes(filterType.toLowerCase());
     const matchesSearch =
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -67,6 +100,46 @@ export const SensorMonitoring: React.FC<SensorMonitoringProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Live Global Internet Telemetry Mesh Status */}
+      {liveMesh && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-950/40 via-cyan-950/30 to-slate-900/80 border border-cyan-500/30 flex flex-wrap items-center justify-between gap-4 shadow-xl">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+              <Globe className="w-5 h-5 animate-spin" style={{ animationDuration: '12s' }} />
+            </div>
+            <div>
+              <span className="text-xs font-black text-white flex items-center gap-2">
+                Live Internet Telemetry Mesh Ingest
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 animate-pulse">
+                  ● 100% ONLINE (SYNCED)
+                </span>
+              </span>
+              <p className="text-[11px] text-slate-400">
+                Active Source: {liveMesh.source} • Location: {liveMesh.location}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 text-xs font-semibold">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800">
+              <Droplets className="w-4 h-4 text-cyan-400" />
+              <span className="text-slate-400">Precipitation:</span>
+              <strong className="text-white font-mono">{liveMesh.weather.current_rainfall_mm_hr} mm/h</strong>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800">
+              <Waves className="w-4 h-4 text-blue-400" />
+              <span className="text-slate-400">Mithi Discharge:</span>
+              <strong className="text-cyan-400 font-mono">{liveMesh.hydrology?.river_discharge_m3s} m³/s</strong>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800">
+              <Mountain className="w-4 h-4 text-amber-400" />
+              <span className="text-slate-400">Soil Saturation:</span>
+              <strong className="text-amber-300 font-mono">{liveMesh.geotechnical?.soil_moisture_saturation_pct}%</strong>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filter and Search Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 glass-panel p-4 rounded-2xl border border-white/10">

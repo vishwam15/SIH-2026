@@ -35,9 +35,13 @@ export const LandslideIntelligence: React.FC<LandslideIntelligenceProps> = ({
             <h1 className="text-2xl lg:text-3xl font-extrabold text-white font-display">
               Landslide Intelligence ⛰️
             </h1>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+              Live Soil Saturation: {metrics.soilMoisturePct}% • 72h Rain: {metrics.rainfallAccumulation24hMm}mm
+            </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Slope pore water pressure, MEMS tilt vector tracking, and micro-seismic acoustic monitoring
+            Real-time slope pore water pressure, satellite soil moisture, and infinite slope stability Factor of Safety (FoS)
           </p>
         </div>
 

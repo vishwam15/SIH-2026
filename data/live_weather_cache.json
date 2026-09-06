@@ -1,0 +1,123 @@
+{
+  "source": "Open-Meteo Live Meteorology API",
+  "location": "Mumbai Metro Basin (19.0760 N, 72.8777 E)",
+  "timestamp": "2026-09-06T14:30",
+  "current_rainfall_mm_hr": 0.0,
+  "temperature_c": 26.7,
+  "humidity_pct": 85.0,
+  "wind_speed_kmh": 6.6,
+  "weather_condition": "Partly Cloudy",
+  "nowcast_15min": [
+    {
+      "time": "00:00",
+      "precipitation_mm": 0.1
+    },
+    {
+      "time": "00:15",
+      "precipitation_mm": 0.1
+    },
+    {
+      "time": "00:30",
+      "precipitation_mm": 0.1
+    },
+    {
+      "time": "00:45",
+      "precipitation_mm": 0.1
+    },
+    {
+      "time": "01:00",
+      "precipitation_mm": 0.1
+    },
+    {
+      "time": "01:15",
+      "precipitation_mm": 0.1
+    },
+    {
+      "time": "01:30",
+      "precipitation_mm": 0.1
+    },
+    {
+      "time": "01:45",
+      "precipitation_mm": 0.1
+    },
+    {
+      "time": "02:00",
+      "precipitation_mm": 0.1
+    },
+    {
+      "time": "02:15",
+      "precipitation_mm": 0.1
+    },
+    {
+      "time": "02:30",
+      "precipitation_mm": 0.1
+    },
+    {
+      "time": "02:45",
+      "precipitation_mm": 0.1
+    }
+  ],
+  "hourly_forecast": [
+    {
+      "time": "00:00",
+      "rainfall": 0.3,
+      "threshold": 50.0
+    },
+    {
+      "time": "01:00",
+      "rainfall": 0.2,
+      "threshold": 50.0
+    },
+    {
+      "time": "02:00",
+      "rainfall": 0.2,
+      "threshold": 50.0
+    },
+    {
+      "time": "03:00",
+      "rainfall": 0.5,
+      "threshold": 50.0
+    },
+    {
+      "time": "04:00",
+      "rainfall": 0.2,
+      "threshold": 50.0
+    },
+    {
+      "time": "05:00",
+      "rainfall": 0.3,
+      "threshold": 50.0
+    },
+    {
+      "time": "06:00",
+      "rainfall": 0.1,
+      "threshold": 50.0
+    },
+    {
+      "time": "07:00",
+      "rainfall": 0.3,
+      "threshold": 50.0
+    },
+    {
+      "time": "08:00",
+      "rainfall": 0.2,
+      "threshold": 50.0
+    },
+    {
+      "time": "09:00",
+      "rainfall": 0.1,
+      "threshold": 50.0
+    },
+    {
+      "time": "10:00",
+      "rainfall": 0.1,
+      "threshold": 50.0
+    },
+    {
+      "time": "11:00",
+      "rainfall": 0.2,
+      "threshold": 50.0
+    }
+  ],
+  "is_live_api": true
+}

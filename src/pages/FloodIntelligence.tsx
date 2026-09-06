@@ -38,9 +38,13 @@ export const FloodIntelligence: React.FC<FloodIntelligenceProps> = ({
             <h1 className="text-2xl lg:text-3xl font-extrabold text-white font-display">
               Urban Flood Intelligence 🌊
             </h1>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+              Live GloFAS Stream: {metrics.waterFlowRateM3s || 142} m³/s
+            </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Catchment basin hydraulic telemetry, drainage load stress, and flood inundation forecasting
+            Real-time catchment basin hydraulic telemetry, drainage surcharge stress, and GloFAS river discharge
           </p>
         </div>
 

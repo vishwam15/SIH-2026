@@ -1,0 +1,140 @@
+{
+  "source": "Open-Meteo Satellite & GloFAS Hydrology Mesh",
+  "location": "Mumbai Metropolitan Catchment (19.0760\u00b0 N, 72.8777\u00b0 E)",
+  "timestamp": "2026-09-06T17:30",
+  "is_live_stream": true,
+  "weather": {
+    "current_rainfall_mm_hr": 0.0,
+    "temperature_c": 25.9,
+    "humidity_pct": 91.0,
+    "wind_speed_kmh": 2.4,
+    "surface_pressure_hpa": 1012.6,
+    "weather_condition": "Partly Cloudy",
+    "nowcast_15min": [
+      {
+        "time": "00:00",
+        "precipitation_mm": 0.1
+      },
+      {
+        "time": "00:15",
+        "precipitation_mm": 0.1
+      },
+      {
+        "time": "00:30",
+        "precipitation_mm": 0.1
+      },
+      {
+        "time": "00:45",
+        "precipitation_mm": 0.1
+      },
+      {
+        "time": "01:00",
+        "precipitation_mm": 0.1
+      },
+      {
+        "time": "01:15",
+        "precipitation_mm": 0.1
+      },
+      {
+        "time": "01:30",
+        "precipitation_mm": 0.1
+      },
+      {
+        "time": "01:45",
+        "precipitation_mm": 0.1
+      },
+      {
+        "time": "02:00",
+        "precipitation_mm": 0.1
+      },
+      {
+        "time": "02:15",
+        "precipitation_mm": 0.1
+      },
+      {
+        "time": "02:30",
+        "precipitation_mm": 0.1
+      },
+      {
+        "time": "02:45",
+        "precipitation_mm": 0.1
+      }
+    ],
+    "hourly_forecast": [
+      {
+        "time": "00:00",
+        "rainfall": 0.3,
+        "threshold": 50.0
+      },
+      {
+        "time": "01:00",
+        "rainfall": 0.2,
+        "threshold": 50.0
+      },
+      {
+        "time": "02:00",
+        "rainfall": 0.2,
+        "threshold": 50.0
+      },
+      {
+        "time": "03:00",
+        "rainfall": 0.5,
+        "threshold": 50.0
+      },
+      {
+        "time": "04:00",
+        "rainfall": 0.2,
+        "threshold": 50.0
+      },
+      {
+        "time": "05:00",
+        "rainfall": 0.3,
+        "threshold": 50.0
+      },
+      {
+        "time": "06:00",
+        "rainfall": 0.1,
+        "threshold": 50.0
+      },
+      {
+        "time": "07:00",
+        "rainfall": 0.3,
+        "threshold": 50.0
+      },
+      {
+        "time": "08:00",
+        "rainfall": 0.2,
+        "threshold": 50.0
+      },
+      {
+        "time": "09:00",
+        "rainfall": 0.1,
+        "threshold": 50.0
+      },
+      {
+        "time": "10:00",
+        "rainfall": 0.1,
+        "threshold": 50.0
+      },
+      {
+        "time": "11:00",
+        "rainfall": 0.2,
+        "threshold": 50.0
+      }
+    ]
+  },
+  "hydrology": {
+    "river_discharge_m3s": 16.7,
+    "mithi_water_level_m": 1.43,
+    "tidal_level_m": 2.8,
+    "drainage_stress_pct": 9.3
+  },
+  "geotechnical": {
+    "soil_moisture_saturation_pct": 34.3,
+    "subsurface_moisture_pct": 34.2,
+    "rainfall_72h_accum_mm": 17.8,
+    "pore_water_pressure_kpa": 2.0,
+    "slope_factor_of_safety": 1.9,
+    "landslide_risk_level": "LOW"
+  }
+}
