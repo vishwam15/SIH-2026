@@ -1,0 +1,449 @@
+import React from 'react';
+import type {
+  DashboardStats,
+  MapZone,
+  SensorData,
+  EmergencyAlert,
+  PageId,
+  UserRole,
+} from '../types';
+import { StatCard } from '../components/common/StatCard';
+import { QuickAlertsTicker } from '../components/dashboard/QuickAlertsTicker';
+import { MultiHazardMap } from '../components/maps/MultiHazardMap';
+import { CitizenSafetyOverlay } from '../components/maps/CitizenSafetyOverlay';
+import { LiveGISMap } from '../components/LiveGISMap';
+import { RiskBadge } from '../components/common/RiskBadge';
+import {
+  Waves,
+  Radio,
+  ShieldAlert,
+  Activity,
+  Layers,
+  Shield,
+  Building2,
+  Truck,
+  Wrench,
+  Bell,
+  Navigation,
+  Award,
+} from 'lucide-react';
+
+interface DashboardProps {
+  stats: DashboardStats;
+  zones: MapZone[];
+  sensors: SensorData[];
+  alerts: EmergencyAlert[];
+  onNavigate: (page: PageId) => void;
+  onSelectZone: (zone: MapZone) => void;
+  userRole?: UserRole;
+  userName?: string;
+  userLocation?: { lat: number; lng: number } | null;
+  liveLocations?: any[];
+  activeSos?: any[];
+  onUseMyLocation?: () => void;
+  onTriggerSOS?: () => void;
+}
+
+export const Dashboard: React.FC<DashboardProps> = ({
+  stats,
+  zones,
+  sensors,
+  alerts,
+  onNavigate,
+  onSelectZone,
+  userRole = 'authority',
+  userName,
+  userLocation,
+  liveLocations = [],
+  activeSos = [],
+  onUseMyLocation,
+  onTriggerSOS,
+}) => {
+  const criticalZones = zones.filter(
+    (z) => z.riskLevel === 'CRITICAL' || z.riskLevel === 'HIGH'
+  );
+
+  const getRoleTitle = () => {
+    switch (userRole) {
+      case 'admin':
+        return 'System Admin';
+      case 'authority':
+        return 'Disaster Management Authority';
+      case 'response':
+        return 'Emergency Response Team';
+      case 'field':
+        return 'Field Maintenance Officer';
+      case 'citizen':
+        return 'Citizen Safety Viewer';
+      default:
+        return 'Disaster Authority';
+    }
+  };
+
+  return (
+    <div className="p-6 space-y-6 pb-12">
+      {/* Role-Tailored Action Banner */}
+      <div className="glass-panel p-5 rounded-2xl border border-slate-800 bg-slate-900/80 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+            {userRole === 'admin' ? (
+              <Shield className="w-6 h-6" />
+            ) : userRole === 'authority' ? (
+              <Building2 className="w-6 h-6" />
+            ) : userRole === 'response' ? (
+              <Truck className="w-6 h-6 text-rose-400" />
+            ) : (
+              <Wrench className="w-6 h-6 text-amber-400" />
+            )}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="font-extrabold text-lg text-white font-display">
+                Logged in as: <span className="text-emerald-400">{getRoleTitle()}</span>
+              </h2>
+              <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+                Active Clearance
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Role-tailored command dashboard shortcuts & hazard dispatch tools
+            </p>
+          </div>
+        </div>
+
+        {/* Dynamic Quick Actions per Selected Role */}
+        <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
+          {userRole === 'authority' && (
+            <>
+              <button
+                onClick={() => onNavigate('alerts')}
+                className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/30 transition flex items-center gap-1.5"
+              >
+                <Bell className="w-4 h-4" /> Dispatch Public Alert
+              </button>
+              <button
+                onClick={() => onNavigate('flood')}
+                className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition flex items-center gap-1.5"
+              >
+                <Waves className="w-4 h-4" /> Flood Models
+              </button>
+            </>
+          )}
+
+          {userRole === 'response' && (
+            <>
+              <button
+                onClick={() => onNavigate('routes')}
+                className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30 transition flex items-center gap-1.5"
+              >
+                <Navigation className="w-4 h-4" /> Safe Routes & Shelters
+              </button>
+              <button
+                onClick={() => onNavigate('alerts')}
+                className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white transition flex items-center gap-1.5"
+              >
+                <ShieldAlert className="w-4 h-4" /> View Emergency Alerts
+              </button>
+            </>
+          )}
+
+          {userRole === 'field' && (
+            <>
+              <button
+                onClick={() => onNavigate('sensors')}
+                className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30 transition flex items-center gap-1.5"
+              >
+                <Radio className="w-4 h-4" /> Telemetry Calibration
+              </button>
+              <button
+                onClick={() => onNavigate('sensors')}
+                className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition flex items-center gap-1.5"
+              >
+                <Wrench className="w-4 h-4 text-amber-400" /> Battery Health
+              </button>
+            </>
+          )}
+
+          {userRole === 'admin' && (
+            <>
+              <button
+                onClick={() => onNavigate('settings')}
+                className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/30 transition flex items-center gap-1.5"
+              >
+                <Shield className="w-4 h-4" /> Configure Threshold Rules
+              </button>
+              <button
+                onClick={() => onNavigate('analytics')}
+                className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition flex items-center gap-1.5"
+              >
+                <Activity className="w-4 h-4 text-cyan-400" /> System Audit Logs
+              </button>
+            </>
+          )}
+
+          {userRole === 'citizen' && (
+            <>
+              <button
+                onClick={() => onNavigate('alerts')}
+                className="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-600/30 transition flex items-center gap-1.5"
+              >
+                <Bell className="w-4 h-4" /> Public Alerts
+              </button>
+              <button
+                onClick={() => onNavigate('routes')}
+                className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5"
+              >
+                <Navigation className="w-4 h-4" /> Evacuation Routes
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Quick Alert Banner */}
+      <QuickAlertsTicker alerts={alerts} onViewAllAlerts={() => onNavigate('alerts')} />
+
+      {userRole === 'citizen' && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="glass-panel p-4 rounded-2xl border border-amber-500/20 bg-amber-500/10">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300">My Risk Area</span>
+              <ShieldAlert className="w-4 h-4 text-amber-300" />
+            </div>
+            <div className="text-2xl font-black text-white">{Math.round(stats?.floodRiskPct ?? 54)}%</div>
+            <p className="text-[11px] text-slate-300 mt-1">
+              {userName ? `Welcome ${userName.split(' ')[0]}` : 'Flood risk in your local sector'}
+            </p>
+            {userLocation && (
+              <p className="text-[10px] mt-2 text-slate-400">
+                Live: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+              </p>
+            )}
+          </div>
+
+          <div className="glass-panel p-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/10">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-300">Nearest Safe Shelter</span>
+              <Navigation className="w-4 h-4 text-emerald-300" />
+            </div>
+            <div className="text-base font-black text-white">Community Relief Center</div>
+            <p className="text-[11px] text-slate-300 mt-1">2.4 km • 14 mins via safe route</p>
+            {onUseMyLocation && (
+              <button
+                onClick={onUseMyLocation}
+                className="mt-3 w-full px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold transition"
+              >
+                Use My Location
+              </button>
+            )}
+          </div>
+
+          <div className="glass-panel p-4 rounded-2xl border border-rose-500/20 bg-rose-500/10">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-rose-300">Emergency SOS</span>
+              <Bell className="w-4 h-4 text-rose-300" />
+            </div>
+            <button
+              onClick={() => (onTriggerSOS ? onTriggerSOS() : onNavigate('routes'))}
+              className="w-full px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition"
+            >
+              Trigger Safety Check
+            </button>
+            <p className="text-[11px] text-slate-300 mt-2">Broadcast alert to nearby responders</p>
+          </div>
+        </div>
+      )}
+
+      {/* STEP 3: 4 KPI Stat Cards Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* KPI 1: Disasters Predicted */}
+        <StatCard
+          title="Disasters Predicted"
+          value="34"
+          badgeText="ZERO CASUALTIES"
+          icon={ShieldAlert}
+          iconColor="text-emerald-400"
+          subtext="100% Impact Avoidance"
+          onClick={() => onNavigate('ai-prediction')}
+        />
+
+        {/* KPI 2: Avg Model Accuracy */}
+        <StatCard
+          title="Avg Model Accuracy"
+          value="96.4%"
+          badgeText="VALIDATED"
+          icon={Award}
+          iconColor="text-cyan-400"
+          subtext="ResNet-LSTM & XGBoost"
+          onClick={() => onNavigate('ai-prediction')}
+        />
+
+        {/* KPI 3: Active Alerts */}
+        <StatCard
+          title="Active Alerts"
+          value="87"
+          riskLevel="CRITICAL"
+          icon={Bell}
+          iconColor="text-rose-400"
+          subtext="Siren & App Broadcasts"
+          onClick={() => onNavigate('alerts')}
+        />
+
+        {/* KPI 4: Sensor Network Uptime */}
+        <StatCard
+          title="Sensor Network Uptime"
+          value="99.8%"
+          badgeText="RELIABLE"
+          icon={Radio}
+          iconColor="text-emerald-400"
+          subtext="24 IoT Hardware Nodes Live"
+          onClick={() => onNavigate('sensors')}
+        />
+      </div>
+
+      {/* Interactive Leaflet Map Section with City Geocoding Search */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold text-white font-display flex items-center gap-2">
+            <Layers className="w-5 h-5 text-emerald-400" />
+            Interactive Multi-Hazard Map & Nominatim Geocoder
+          </h2>
+          <span className="text-xs text-slate-400">
+            Floating City Search (`absolute top-4 left-4 z-[1000]`)
+          </span>
+        </div>
+
+        <div className="relative">
+          {userRole === 'citizen' || userRole === 'authority' || userRole === 'field' ? (
+            <LiveGISMap
+              userRole={userRole}
+              currentUserLocation={userLocation}
+              liveLocations={liveLocations}
+              activeSos={activeSos}
+            />
+          ) : (
+            <MultiHazardMap
+              zones={zones}
+              sensors={sensors}
+              onSelectLocation={onSelectZone}
+              height="540px"
+            />
+          )}
+
+          {userRole === 'citizen' && (
+            <CitizenSafetyOverlay
+              onTriggerSOS={() => onNavigate('alerts')}
+              shelterName="Community Relief Center"
+              distanceKm={2.4}
+              travelMinutes={14}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Bottom Grid: Sector Priority Table & Sensor Live Stream */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Priority Table (Col 8) */}
+        <div className="lg:col-span-8 glass-panel p-5 rounded-2xl border border-slate-800">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-base text-white font-display flex items-center gap-2">
+              <ShieldAlert className="w-5 h-5 text-rose-400" />
+              High Risk Priority Sectors ({criticalZones.length})
+            </h3>
+            <button
+              onClick={() => onNavigate('flood')}
+              className="text-xs text-emerald-400 font-bold hover:underline flex items-center gap-1"
+            >
+              Full Flood Intelligence &rarr;
+            </button>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-900/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                <tr>
+                  <th className="p-3">Sector Name</th>
+                  <th className="p-3">Hazard Type</th>
+                  <th className="p-3">Risk Level</th>
+                  <th className="p-3">Rainfall</th>
+                  <th className="p-3">Water Level</th>
+                  <th className="p-3">Inundation / Slope Risk</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60">
+                {criticalZones.map((zone) => (
+                  <tr
+                    key={zone.id}
+                    onClick={() => onSelectZone(zone)}
+                    className="hover:bg-slate-800/50 cursor-pointer transition"
+                  >
+                    <td className="p-3 font-semibold text-white">{zone.name}</td>
+                    <td className="p-3">
+                      <span className="capitalize text-slate-300 font-medium">{zone.type}</span>
+                    </td>
+                    <td className="p-3">
+                      <RiskBadge level={zone.riskLevel} size="sm" />
+                    </td>
+                    <td className="p-3 font-bold text-cyan-400">{zone.rainfallMmHr} mm/h</td>
+                    <td className="p-3 font-bold text-blue-400">{zone.waterLevelM} m</td>
+                    <td className="p-3">
+                      <span className="font-extrabold text-rose-400">
+                        {zone.type === 'flood' ? zone.floodRiskPct : zone.landslideRiskPct}%
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* NDMA Integrated Hazard Feeds (Col 4) */}
+        <div className="lg:col-span-4 glass-panel p-5 rounded-2xl border border-slate-800">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-base text-white font-display flex items-center gap-2">
+              <Radio className="w-5 h-5 text-emerald-400" />
+              NDMA Integrated Hazard Feeds
+            </h3>
+            <button
+              onClick={() => onNavigate('sensors')}
+              className="text-xs text-emerald-400 font-bold hover:underline"
+            >
+              View All
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {sensors.slice(0, 4).map((sensor) => (
+              <div
+                key={sensor.id}
+                onClick={() => onNavigate('sensors')}
+                className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 hover:border-emerald-500/40 transition cursor-pointer"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-bold text-white">{sensor.name}</span>
+                  <span
+                    className={`text-[10px] font-bold ${
+                      sensor.status === 'ONLINE'
+                        ? 'text-emerald-400'
+                        : sensor.status === 'WARNING'
+                        ? 'text-amber-400'
+                        : 'text-rose-400'
+                    }`}
+                  >
+                    ● {sensor.status}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400 mb-2">{sensor.locationName}</p>
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-bold text-cyan-400">{sensor.latestReading}</span>
+                  <span className="text-slate-500">{sensor.lastUpdated}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
