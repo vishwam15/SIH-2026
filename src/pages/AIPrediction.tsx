@@ -16,13 +16,23 @@ import {
   Flame,
 } from 'lucide-react';
 
+import { mockAIPredictions } from '../data/mockData';
+
 interface AIPredictionProps {
   predictions: AIPredictionResult[];
 }
 
 export const AIPrediction: React.FC<AIPredictionProps> = ({ predictions: initialPredictions }) => {
-  const [predictionsList, setPredictionsList] = useState<AIPredictionResult[]>(initialPredictions);
+  const [predictionsList, setPredictionsList] = useState<AIPredictionResult[]>(() => {
+    return initialPredictions && initialPredictions.length > 0 ? initialPredictions : mockAIPredictions;
+  });
   const [liveMesh, setLiveMesh] = useState<LiveTelemetryMesh | null>(null);
+
+  useEffect(() => {
+    if (initialPredictions && initialPredictions.length > 0) {
+      setPredictionsList(initialPredictions);
+    }
+  }, [initialPredictions]);
 
   // Live Simulator Inputs
   const [simRainfall, setSimRainfall] = useState<number>(85);

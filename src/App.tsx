@@ -128,10 +128,26 @@ const getPageFromPath = (pathname: string): PageId => {
   }
 };
 
+import {
+  mockDashboardStats,
+  mockMapZones,
+  mockSensors,
+  mockAlerts,
+  mockFloodMetrics,
+  mockLandslideMetrics,
+  mockAIPredictions,
+  mockSafeRoutes,
+} from './data/mockData';
+
 export const App: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 1024;
+    }
+    return true;
+  });
   const [isSimulatingLive, setIsSimulatingLive] = useState(true);
   const [users, setUsers] = useState<any[]>(() => {
     if (typeof window === 'undefined') return sampleUsers;
@@ -147,15 +163,15 @@ export const App: React.FC = () => {
   const [userRole, setUserRole] = useState<UserRole>('authority');
   const [userEmail, setUserEmail] = useState<string>('officer.authority@sih2026.gov');
 
-  const [stats, setStats] = useState<any>(null);
-  const [zones, setZones] = useState<MapZone[]>([]);
-  const [sensors, setSensors] = useState<SensorData[]>([]);
-  const [alerts, setAlerts] = useState<EmergencyAlert[]>([]);
-  const [floodMetrics, setFloodMetrics] = useState<any>(null);
-  const [landslideMetrics, setLandslideMetrics] = useState<any>(null);
-  const [aiPredictions, setAiPredictions] = useState<any[]>([]);
-  const [safeRoutes, setSafeRoutes] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<any>(mockDashboardStats);
+  const [zones, setZones] = useState<MapZone[]>(mockMapZones);
+  const [sensors, setSensors] = useState<SensorData[]>(mockSensors);
+  const [alerts, setAlerts] = useState<EmergencyAlert[]>(mockAlerts);
+  const [floodMetrics, setFloodMetrics] = useState<any>(mockFloodMetrics);
+  const [landslideMetrics, setLandslideMetrics] = useState<any>(mockLandslideMetrics);
+  const [aiPredictions, setAiPredictions] = useState<any[]>(mockAIPredictions);
+  const [safeRoutes, setSafeRoutes] = useState<any[]>(mockSafeRoutes);
+  const [loading, setLoading] = useState(false);
   const [liveLocations, setLiveLocations] = useState<any[]>([]);
   const [activeSos, setActiveSos] = useState<any[]>([]);
   const liveSocketRef = useRef<any>(null);
@@ -403,10 +419,12 @@ export const App: React.FC = () => {
         )}
 
         <main
-          className={`flex-1 w-full transition-all ${
+          className={`flex-1 w-full transition-[padding] duration-300 ease-in-out ${
             isLanding || isAuthPage
               ? 'pl-0 pt-0 min-h-screen overflow-y-auto'
-              : 'pl-0 lg:pl-6 pt-14 h-screen overflow-y-auto bg-slate-950'
+              : `pt-14 h-screen overflow-y-auto bg-slate-950 ${
+                  sidebarOpen ? 'lg:pl-64' : 'lg:pl-0'
+                }`
           }`}
         >
           <Routes>

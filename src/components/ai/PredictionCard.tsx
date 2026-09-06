@@ -74,22 +74,22 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction }) =>
         </h4>
 
         <div className="space-y-2">
-          {prediction.keyFactors.map((factor, idx) => (
+          {(prediction?.keyFactors || []).map((factor, idx) => (
             <div key={idx} className="space-y-1">
               <div className="flex justify-between text-xs">
-                <span className="text-slate-300 font-medium">{factor.name}</span>
-                <span className="text-slate-400 font-bold">{factor.weightPct}% Influence</span>
+                <span className="text-slate-300 font-medium">{factor?.name || 'Factor'}</span>
+                <span className="text-slate-400 font-bold">{factor?.weightPct ?? 0}% Influence</span>
               </div>
               <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full ${
-                    factor.impact === 'HIGH'
+                    factor?.impact === 'HIGH'
                       ? 'bg-rose-500'
-                      : factor.impact === 'MEDIUM'
+                      : factor?.impact === 'MEDIUM'
                       ? 'bg-amber-500'
                       : 'bg-blue-500'
                   }`}
-                  style={{ width: `${factor.weightPct}%` }}
+                  style={{ width: `${factor?.weightPct ?? 0}%` }}
                 />
               </div>
             </div>
@@ -102,7 +102,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction }) =>
         <AlertCircle className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
         <div>
           <span className="font-bold text-white block mb-0.5">AI Analytical Synthesis:</span>
-          "{prediction.summaryText}"
+          "{prediction?.summaryText || 'Physics-informed hazard synthesis model active.'}"
         </div>
       </div>
 
@@ -111,7 +111,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction }) =>
         <div className="flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           <span className="text-slate-300 font-medium">
-            Intervention: <strong className="text-white">{prediction.recommendedIntervention}</strong>
+            Intervention: <strong className="text-white">{prediction?.recommendedIntervention || 'Deploy standard response.'}</strong>
           </span>
         </div>
       </div>
