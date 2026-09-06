@@ -8,7 +8,9 @@ interface PredictionCardProps {
 }
 
 export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction }) => {
-  const isFlood = prediction.hazardType === 'FLOOD';
+  if (!prediction) return null;
+
+  const isFlood = prediction?.hazardType === 'FLOOD';
   const Icon = isFlood ? Waves : Mountain;
   const accentColor = isFlood ? 'text-cyan-400' : 'text-amber-400';
   const borderAccent = isFlood ? 'border-cyan-500/30' : 'border-amber-500/30';

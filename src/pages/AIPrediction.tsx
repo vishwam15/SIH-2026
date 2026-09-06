@@ -60,7 +60,7 @@ export const AIPrediction: React.FC<AIPredictionProps> = ({ predictions: initial
 
   const handleSyncLiveInternetData = () => {
     if (liveMesh) {
-      setSimRainfall(liveMesh.weather.current_rainfall_mm_hr || 45);
+      setSimRainfall(liveMesh.weather?.current_rainfall_mm_hr || 45);
       setSimSoilMoisture(liveMesh.geotechnical?.soil_moisture_saturation_pct || 75);
       setInferenceFeedback('Synced with real-time Open-Meteo & GloFAS Internet Telemetry!');
       setTimeout(() => setInferenceFeedback(null), 3000);

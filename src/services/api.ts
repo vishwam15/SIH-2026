@@ -23,6 +23,15 @@ import type {
 
 const BACKEND_API_BASE = 'http://localhost:8000/api/v1';
 
+const safeTimeoutSignal = (ms: number): AbortSignal => {
+  if (typeof AbortSignal !== 'undefined' && typeof (AbortSignal as any).timeout === 'function') {
+    return (AbortSignal as any).timeout(ms);
+  }
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(), ms);
+  return controller.signal;
+};
+
 export interface GeoJSONFeature {
   type: string;
   id: string;
@@ -65,7 +74,7 @@ export class DisasterShieldAPI {
    */
   static async isBackendOnline(): Promise<boolean> {
     try {
-      const res = await fetch(`${BACKEND_API_BASE}/health`, { method: 'GET', signal: AbortSignal.timeout(1500) });
+      const res = await fetch(`${BACKEND_API_BASE}/health`, { method: 'GET', signal: safeTimeoutSignal(1500) });
       return res.ok;
     } catch {
       return false;
@@ -80,7 +89,7 @@ export class DisasterShieldAPI {
       const res = await fetch(`${BACKEND_API_BASE}/flood-nowcast?rainfall_mm=${rainfallMm}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
-        signal: AbortSignal.timeout(4000),
+        signal: safeTimeoutSignal(4000),
       });
       if (res.ok) {
         return (await res.json()) as GeoJSONNowcastResponse;
@@ -96,7 +105,7 @@ export class DisasterShieldAPI {
    */
   static async getLiveTelemetryMesh(): Promise<LiveTelemetryMesh | null> {
     try {
-      const res = await fetch(`${BACKEND_API_BASE}/live-telemetry-mesh`, { signal: AbortSignal.timeout(3500) });
+      const res = await fetch(`${BACKEND_API_BASE}/live-telemetry-mesh`, { signal: safeTimeoutSignal(3500) });
       if (res.ok) {
         return (await res.json()) as LiveTelemetryMesh;
       }
@@ -111,7 +120,7 @@ export class DisasterShieldAPI {
    */
   static async getLiveWeather(): Promise<any> {
     try {
-      const res = await fetch(`${BACKEND_API_BASE}/live-weather`, { signal: AbortSignal.timeout(3000) });
+      const res = await fetch(`${BACKEND_API_BASE}/live-weather`, { signal: safeTimeoutSignal(3000) });
       if (res.ok) return await res.json();
     } catch {
       // fallback
@@ -136,7 +145,7 @@ export class DisasterShieldAPI {
           end,
           current_rainfall_mm: rainfallMm,
         }),
-        signal: AbortSignal.timeout(4000),
+        signal: safeTimeoutSignal(4000),
       });
 
       if (res.ok) {
@@ -248,7 +257,7 @@ export class DisasterShieldAPI {
 
   static async getSensors(): Promise<SensorData[]> {
     try {
-      const res = await fetch(`${BACKEND_API_BASE}/telemetry`, { signal: AbortSignal.timeout(3000) });
+      const res = await fetch(`${BACKEND_API_BASE}/telemetry`, { signal: safeTimeoutSignal(3000) });
       if (res.ok) {
         return (await res.json()) as SensorData[];
       }
@@ -352,7 +361,7 @@ export class DisasterShieldAPI {
           soil_moisture_pct: soilMoisturePct,
           slope_degrees: slopeDeg,
         }),
-        signal: AbortSignal.timeout(3000),
+        signal: safeTimeoutSignal(3000),
       });
       if (res.ok) {
         const data = await res.json();
@@ -385,7 +394,7 @@ export class DisasterShieldAPI {
                 rainfall_mm_hr: h.rain,
                 elevation_m: h.elev,
               }),
-              signal: AbortSignal.timeout(3000),
+              signal: safeTimeoutSignal(3000),
             });
 
             if (res.ok) {

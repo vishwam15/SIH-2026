@@ -15,19 +15,14 @@ export const RiskBadge: React.FC<RiskBadgeProps> = ({
   size = 'md',
   animated = false,
 }) => {
+  const normalizedLevel = (level ? String(level).toUpperCase() : 'MODERATE') as RiskLevel;
   const getBadgeStyle = () => {
-    switch (level) {
+    switch (normalizedLevel) {
       case 'LOW':
         return {
           bg: 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400',
           dot: 'bg-emerald-500',
           icon: ShieldCheck,
-        };
-      case 'MODERATE':
-        return {
-          bg: 'bg-amber-500/15 border-amber-500/40 text-amber-400',
-          dot: 'bg-amber-500',
-          icon: AlertTriangle,
         };
       case 'HIGH':
         return {
@@ -40,6 +35,13 @@ export const RiskBadge: React.FC<RiskBadgeProps> = ({
           bg: 'bg-rose-600/25 border-rose-500/60 text-rose-400 animate-pulse-glow',
           dot: 'bg-rose-500',
           icon: Flame,
+        };
+      case 'MODERATE':
+      default:
+        return {
+          bg: 'bg-amber-500/15 border-amber-500/40 text-amber-400',
+          dot: 'bg-amber-500',
+          icon: AlertTriangle,
         };
     }
   };

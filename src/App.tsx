@@ -18,6 +18,7 @@ import { Settings } from './pages/Settings';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
 import { FloodEvacuationChatbot } from './components/ai/FloodEvacuationChatbot';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 const STORAGE_KEY = 'disastershield-users';
 const SESSION_KEY = 'disastershield-session';
@@ -427,56 +428,58 @@ export const App: React.FC = () => {
                 }`
           }`}
         >
-          <Routes>
-            <Route path="/" element={<Navigate to="/landingpage" replace />} />
-            <Route path="/landingpage" element={<LandingPage onNavigate={handleNavigate} />} />
-            <Route
-              path="/login"
-              element={<LoginPage users={users} onLoginSuccess={handleLoginSuccess} onNavigate={handleNavigate} />}
-            />
-            <Route
-              path="/signup"
-              element={<SignupPage users={users} onSignupSuccess={handleSignupSuccess} onNavigate={handleNavigate} />}
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <Dashboard
-                  stats={stats}
-                  zones={zones}
-                  sensors={sensors}
-                  alerts={alerts}
-                  onNavigate={handleNavigate}
-                  onSelectZone={handleSelectZone}
-                  userRole={userRole}
-                  userName={currentUser?.fullName || userEmail}
-                  userLocation={userLocation}
-                  liveLocations={liveLocations}
-                  activeSos={activeSos}
-                  onUseMyLocation={handleUseMyLocation}
-                  onTriggerSOS={handleCitizenSOS}
-                />
-              }
-            />
-            <Route
-              path="/flood"
-              element={<FloodIntelligence metrics={floodMetrics} onNavigate={handleNavigate} />}
-            />
-            <Route
-              path="/landslide"
-              element={<LandslideIntelligence metrics={landslideMetrics} onNavigate={handleNavigate} />}
-            />
-            <Route path="/ai-prediction" element={<AIPrediction predictions={aiPredictions} />} />
-            <Route path="/sensors" element={<SensorMonitoring sensors={sensors} />} />
-            <Route
-              path="/alerts"
-              element={<Alerts alerts={alerts} onAcknowledge={handleAcknowledgeAlert} />}
-            />
-            <Route path="/routes" element={<SafeRoutes routes={safeRoutes} />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="*" element={<Navigate to="/landingpage" replace />} />
-          </Routes>
+          <ErrorBoundary fallbackTitle="Page Error">
+            <Routes>
+              <Route path="/" element={<Navigate to="/landingpage" replace />} />
+              <Route path="/landingpage" element={<LandingPage onNavigate={handleNavigate} />} />
+              <Route
+                path="/login"
+                element={<LoginPage users={users} onLoginSuccess={handleLoginSuccess} onNavigate={handleNavigate} />}
+              />
+              <Route
+                path="/signup"
+                element={<SignupPage users={users} onSignupSuccess={handleSignupSuccess} onNavigate={handleNavigate} />}
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <Dashboard
+                    stats={stats}
+                    zones={zones}
+                    sensors={sensors}
+                    alerts={alerts}
+                    onNavigate={handleNavigate}
+                    onSelectZone={handleSelectZone}
+                    userRole={userRole}
+                    userName={currentUser?.fullName || userEmail}
+                    userLocation={userLocation}
+                    liveLocations={liveLocations}
+                    activeSos={activeSos}
+                    onUseMyLocation={handleUseMyLocation}
+                    onTriggerSOS={handleCitizenSOS}
+                  />
+                }
+              />
+              <Route
+                path="/flood"
+                element={<FloodIntelligence metrics={floodMetrics} onNavigate={handleNavigate} />}
+              />
+              <Route
+                path="/landslide"
+                element={<LandslideIntelligence metrics={landslideMetrics} onNavigate={handleNavigate} />}
+              />
+              <Route path="/ai-prediction" element={<AIPrediction predictions={aiPredictions} />} />
+              <Route path="/sensors" element={<SensorMonitoring sensors={sensors} />} />
+              <Route
+                path="/alerts"
+                element={<Alerts alerts={alerts} onAcknowledge={handleAcknowledgeAlert} />}
+              />
+              <Route path="/routes" element={<SafeRoutes routes={safeRoutes} />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<Navigate to="/landingpage" replace />} />
+            </Routes>
+          </ErrorBoundary>
         </main>
       </div>
 
