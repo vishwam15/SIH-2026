@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import type { PageId, UserRole } from '../../types';
 import {
-  ShieldAlert,
   Bell,
   User,
   Radio,
@@ -53,6 +52,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         return 'Emergency Response';
       case 'field':
         return 'Field Officer';
+      case 'citizen':
+        return 'Citizen Safety';
       default:
         return 'Command Ops';
     }
@@ -118,14 +119,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           onClick={() => onNavigate('landing')}
           className="flex items-center gap-2.5 cursor-pointer group ml-1"
         >
-          <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
-            <ShieldAlert className="w-4 h-4 text-white" />
-            <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500" />
-            </span>
-          </div>
-          <div className="hidden sm:block">
+          <img
+            src="/SIHLOGO.png"
+            alt="SIH Logo"
+            className="h-9 w-9 rounded-lg object-cover border border-slate-700 bg-slate-900 shadow-md shadow-sky-500/10"
+          />
+          <div>
             <div className="flex items-center gap-1.5">
               <span className="text-base font-black tracking-tight text-white font-display">
                 Disaster<span className="text-cyan-400">Shield</span> AI

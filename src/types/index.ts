@@ -1,9 +1,24 @@
 export type RiskLevel = 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
 
-export type UserRole = 'admin' | 'authority' | 'response' | 'field';
+export type UserRole = 'admin' | 'authority' | 'response' | 'field' | 'citizen';
+
+export interface AppUser {
+  id: string;
+  fullName: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  department: string;
+  phone?: string;
+  location?: {
+    lat: number;
+    lng: number;
+  };
+}
 
 export type PageId =
   | 'login'
+  | 'signup'
   | 'landing'
   | 'dashboard'
   | 'flood'
