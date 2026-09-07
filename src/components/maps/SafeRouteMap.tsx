@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, Circle, useMap } from 'react-leaflet';
+import { MapContainer, Marker, Popup, Polyline, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import { AppMapTileLayer } from './AppMapTileLayer';
 import type { SafeRouteInfo } from '../../types';
 import { Navigation, AlertTriangle, ShieldCheck } from 'lucide-react';
 
@@ -98,11 +99,7 @@ export const SafeRouteMap: React.FC<SafeRouteMapProps> = ({ route, height = '480
       {/* Map Container - Zoom controls and route display with zero clashes */}
       <div style={{ height }} className="relative w-full">
         <MapContainer center={[centerLat, centerLng]} zoom={13} scrollWheelZoom={true} className="w-full h-full">
-          {/* Watermark-free, high-clarity Carto Voyager Dark Basemap */}
-          <TileLayer
-            attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-          />
+          <AppMapTileLayer defaultMode="streets" />
 
           <RouteBoundsFitter coords={route.coordinatesPath} hazards={route.hazardousPoints || []} />
 

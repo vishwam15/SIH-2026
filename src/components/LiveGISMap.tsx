@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, Circle, useMap } from 'react-leaflet';
+import { MapContainer, Marker, Popup, Polyline, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import type { MapZone } from '../types';
+import { AppMapTileLayer } from './maps/AppMapTileLayer';
 
 type LiveLocationEntry = {
   userId: string;
@@ -13,9 +15,12 @@ type LiveLocationEntry = {
 
 type LiveGISMapProps = {
   userRole?: string;
+  currentUserId?: string;
   currentUserLocation?: { lat: number; lng: number } | null;
   liveLocations?: LiveLocationEntry[];
   activeSos?: LiveLocationEntry[];
+  safeZone?: { name: string; lat: number; lng: number };
+  zones?: MapZone[];
 };
 
 const citizenIcon = L.divIcon({
@@ -56,6 +61,13 @@ const sosIcon = L.divIcon({
   iconAnchor: [13, 13],
 });
 
+const safeZoneIcon = L.divIcon({
+  className: 'live-safe-zone-pin',
+  html: '<div style="width:22px;height:22px;border-radius:7px;background:#10b981;border:3px solid #ecfdf5;box-shadow:0 0 16px rgba(16,185,129,0.8);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:13px;">S</div>',
+  iconSize: [22, 22],
+  iconAnchor: [11, 11],
+});
+
 function RecenterButton({ target }: { target: { lat: number; lng: number } }) {
   const map = useMap();
 
@@ -86,37 +98,74 @@ function RecenterButton({ target }: { target: { lat: number; lng: number } }) {
   );
 }
 
-function BuildRoute({ activeSos, liveLocations }: { activeSos: LiveLocationEntry[]; liveLocations: LiveLocationEntry[] }) {
+function BuildRoute({
+  userRole,
+  currentUserId,
+  selectedSosId,
+  activeSos,
+  liveLocations,
+  currentUserLocation,
+  safeZone,
+  routeToSafeZone,
+}: {
+  userRole?: string;
+  currentUserId?: string;
+  selectedSosId?: string | null;
+  activeSos: LiveLocationEntry[];
+  liveLocations: LiveLocationEntry[];
+  currentUserLocation?: { lat: number; lng: number } | null;
+  safeZone?: { name: string; lat: number; lng: number };
+  routeToSafeZone: boolean;
+}) {
   const [route, setRoute] = useState<Array<[number, number]>>([]);
+  const [routeKind, setRouteKind] = useState<'response' | 'safe-zone'>('response');
 
   useEffect(() => {
-    if (!activeSos || activeSos.length === 0) {
+    const sos = activeSos.find((item) => item.userId === selectedSosId) || activeSos[0];
+    let start: { lat: number; lng: number } | null = null;
+    let destination: { lat: number; lng: number } | null = null;
+    let kind: 'response' | 'safe-zone' = 'response';
+
+    const isResponder = ['field', 'field_officer', 'response', 'response_team'].includes(userRole ?? '');
+    const isCitizen = userRole === 'citizen';
+
+    if (sos && isResponder && routeToSafeZone && safeZone) {
+      start = { lat: sos.lat, lng: sos.lng };
+      destination = safeZone;
+      kind = 'safe-zone';
+    } else if (sos) {
+      const officers = liveLocations.filter((item) =>
+        ['field', 'field_officer', 'response', 'response_team', 'authority', 'admin'].includes(item.role ?? '')
+      );
+      const ownUnit = currentUserId ? officers.find((unit) => unit.userId === currentUserId) : null;
+      const nearest = ownUnit || (!isResponder ? officers
+        .map((unit) => ({ ...unit, distance: Math.hypot(unit.lat - sos.lat, unit.lng - sos.lng) }))
+        .sort((a, b) => a.distance - b.distance)[0] : null);
+      if (isCitizen) {
+        start = currentUserLocation || { lat: sos.lat, lng: sos.lng };
+        destination = safeZone ? { lat: safeZone.lat, lng: safeZone.lng } : null;
+        kind = 'safe-zone';
+      } else {
+        start = nearest ? { lat: nearest.lat, lng: nearest.lng } : currentUserLocation || null;
+        destination = { lat: sos.lat, lng: sos.lng };
+      }
+    } else if (routeToSafeZone && currentUserLocation && safeZone) {
+      start = currentUserLocation;
+      destination = safeZone;
+      kind = 'safe-zone';
+    }
+
+    if (!start || !destination) {
       setRoute([]);
       return;
     }
 
-    const sos = activeSos[0];
-    const officers = liveLocations.filter((item) => ['field', 'response', 'authority'].includes(item.role ?? ''));
-    if (officers.length === 0) {
-      setRoute([[sos.lat, sos.lng]]);
-      return;
-    }
-
-    const nearest = officers
-      .map((unit) => ({
-        ...unit,
-        distance: Math.hypot(unit.lat - sos.lat, unit.lng - sos.lng),
-      }))
-      .sort((a, b) => a.distance - b.distance)[0];
-
-    const directPath: Array<[number, number]> = [
-      [nearest.lat, nearest.lng],
-      [sos.lat, sos.lng],
-    ];
+    setRouteKind(kind);
+    const directPath: Array<[number, number]> = [[start.lat, start.lng], [destination.lat, destination.lng]];
 
     const fetchRoute = async () => {
       try {
-        const url = `https://router.project-osrm.org/route/v1/driving/${nearest.lng},${nearest.lat};${sos.lng},${sos.lat}?overview=full&geometries=geojson`;
+        const url = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson`;
         const res = await fetch(url);
         if (!res.ok) throw new Error('OSRM unavailable');
         const json = await res.json();
@@ -132,13 +181,25 @@ function BuildRoute({ activeSos, liveLocations }: { activeSos: LiveLocationEntry
     };
 
     fetchRoute();
-  }, [activeSos, liveLocations]);
+  }, [activeSos, currentUserId, currentUserLocation, liveLocations, routeToSafeZone, safeZone, selectedSosId, userRole]);
 
   if (!route.length) return null;
-  return <Polyline positions={route} pathOptions={{ color: '#ef4444', weight: 4, opacity: 0.9, dashArray: '8 8' }} />;
+  return (
+    <Polyline
+      positions={route}
+      pathOptions={{
+        color: routeKind === 'safe-zone' ? '#10b981' : '#ef4444',
+        weight: 5,
+        opacity: 0.95,
+        dashArray: '10 8',
+      }}
+    />
+  );
 }
 
-export const LiveGISMap: React.FC<LiveGISMapProps> = ({ currentUserLocation, liveLocations = [], activeSos = [] }) => {
+export const LiveGISMap: React.FC<LiveGISMapProps> = ({ userRole, currentUserId, currentUserLocation, liveLocations = [], activeSos = [], safeZone, zones = [] }) => {
+  const [routeToSafeZone, setRouteToSafeZone] = useState(false);
+  const [selectedSosId, setSelectedSosId] = useState<string | null>(null);
   const defaultCenter = useMemo(() => {
     if (currentUserLocation) return [currentUserLocation.lat, currentUserLocation.lng] as [number, number];
     return [19.076, 72.8777] as [number, number];
@@ -152,7 +213,7 @@ export const LiveGISMap: React.FC<LiveGISMapProps> = ({ currentUserLocation, liv
       const icon =
         entry.role === 'citizen'
           ? citizenIcon
-          : entry.role === 'field'
+          : ['field', 'response', 'response_team'].includes(entry.role ?? '')
             ? officerIcon
             : ndmaIcon;
 
@@ -190,19 +251,75 @@ export const LiveGISMap: React.FC<LiveGISMapProps> = ({ currentUserLocation, liv
   return (
     <div className="relative overflow-hidden rounded-2xl border border-slate-800 shadow-2xl" style={{ height: 420 }}>
       <MapContainer center={defaultCenter} zoom={13} scrollWheelZoom style={{ height: '100%', width: '100%' }}>
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-        />
+        <AppMapTileLayer defaultMode="dark" />
 
         {currentUserLocation && (
           <Circle center={[currentUserLocation.lat, currentUserLocation.lng]} radius={400} pathOptions={{ color: '#22d3ee', fillColor: '#22d3ee', fillOpacity: 0.15 }} />
         )}
 
+        {zones.map((zone) => {
+          if (!Number.isFinite(zone.coordinates?.lat) || !Number.isFinite(zone.coordinates?.lng)) return null;
+          const radius = Number.isFinite(zone.radiusMeters) ? zone.radiusMeters : 500;
+          const isHazard = zone.type === 'flood' || zone.type === 'landslide';
+          const color = isHazard ? '#ef4444' : '#f59e0b';
+          return (
+            <Circle
+              key={`zone-${zone.id}`}
+              center={[zone.coordinates.lat, zone.coordinates.lng]}
+              radius={radius}
+              pathOptions={{ color, fillColor: color, fillOpacity: isHazard ? 0.2 : 0.1, weight: 2 }}
+            >
+              <Popup>
+                <strong>{zone.name}</strong>
+                <div>{zone.type.toUpperCase()} · {zone.riskLevel}</div>
+                <div>Risk: {zone.type === 'flood' ? zone.floodRiskPct : zone.landslideRiskPct}%</div>
+              </Popup>
+            </Circle>
+          );
+        })}
+
         {markers}
-        <BuildRoute activeSos={activeSos} liveLocations={liveLocations} />
+        {safeZone && (
+          <Marker position={[safeZone.lat, safeZone.lng]} icon={safeZoneIcon}>
+            <Popup>
+              <strong>Safe zone</strong>
+              <div>{safeZone.name}</div>
+            </Popup>
+          </Marker>
+        )}
+        <BuildRoute
+          userRole={userRole}
+          currentUserId={currentUserId}
+          selectedSosId={selectedSosId}
+          activeSos={activeSos}
+          liveLocations={liveLocations}
+          currentUserLocation={currentUserLocation}
+          safeZone={safeZone}
+          routeToSafeZone={routeToSafeZone}
+        />
         {currentUserLocation && <RecenterButton target={currentUserLocation} />}
       </MapContainer>
+      {activeSos.length > 1 && (
+        <label className="absolute right-4 top-4 z-[1200] flex items-center gap-2 rounded-xl border border-rose-400/40 bg-slate-950/95 px-3 py-2 text-[10px] font-bold text-rose-200">
+          SOS incident
+          <select value={selectedSosId || activeSos[0]?.userId} onChange={(event) => setSelectedSosId(event.target.value)} className="rounded bg-slate-900 px-1.5 py-1 text-[10px] text-white">
+            {activeSos.map((sos) => <option key={sos.userId} value={sos.userId}>{sos.userId}</option>)}
+          </select>
+        </label>
+      )}
+      {safeZone && currentUserLocation && (
+        <button
+          type="button"
+          onClick={() => setRouteToSafeZone((visible) => !visible)}
+          className="absolute left-4 bottom-4 z-[1200] rounded-xl border border-emerald-400/40 bg-slate-950/90 px-3 py-2 text-[11px] font-extrabold text-emerald-200 shadow-lg"
+        >
+          {routeToSafeZone
+            ? 'Hide active route'
+            : activeSos.length > 0 && ['field', 'field_officer', 'response', 'response_team'].includes(userRole ?? '')
+              ? `Evacuate to ${safeZone.name}`
+              : `Route to ${safeZone.name}`}
+        </button>
+      )}
     </div>
   );
 };

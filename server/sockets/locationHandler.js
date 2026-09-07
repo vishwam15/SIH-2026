@@ -3,6 +3,7 @@ const activeSos = new Map();
 
 const sanitize = (payload) => ({
   userId: payload.userId,
+  socketId: payload.socketId,
   role: payload.role,
   lat: Number(payload.lat),
   lng: Number(payload.lng),
@@ -14,9 +15,14 @@ const sanitize = (payload) => ({
 const locationHandler = (io) => {
   io.on('connection', (socket) => {
     socket.on('user:location_update', (payload) => {
-      if (!payload || !payload.userId || !payload.lat || !payload.lng) return;
+      if (
+        !payload ||
+        !payload.userId ||
+        !Number.isFinite(Number(payload.lat)) ||
+        !Number.isFinite(Number(payload.lng))
+      ) return;
 
-      const position = sanitize(payload);
+      const position = sanitize({ ...payload, socketId: socket.id });
       activePositions.set(payload.userId, position);
 
       const room = 'dashboard-room';
@@ -31,7 +37,12 @@ const locationHandler = (io) => {
     });
 
     socket.on('sos:triggered', (payload) => {
-      if (!payload || !payload.userId || !payload.lat || !payload.lng) return;
+      if (
+        !payload ||
+        !payload.userId ||
+        !Number.isFinite(Number(payload.lat)) ||
+        !Number.isFinite(Number(payload.lng))
+      ) return;
 
       const sosPayload = {
         userId: payload.userId,
@@ -48,6 +59,24 @@ const locationHandler = (io) => {
 
     socket.on('join-dashboard', () => {
       socket.join('dashboard-room');
+      socket.emit('dashboard:snapshot', {
+        locations: Array.from(activePositions.values()),
+        sos: Array.from(activeSos.values()),
+      });
+    });
+
+    socket.on('disconnect', () => {
+      for (const [userId, position] of activePositions.entries()) {
+        if (position.socketId === socket.id) activePositions.delete(userId);
+      }
+    });
+
+    socket.on('rescue:dispatch', (payload) => {
+      if (!payload?.sosUserId || !payload?.responderId) return;
+      io.to('dashboard-room').emit('rescue:dispatch', {
+        ...payload,
+        dispatchedAt: new Date().toISOString(),
+      });
     });
   });
 };

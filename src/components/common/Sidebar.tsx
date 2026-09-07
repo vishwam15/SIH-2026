@@ -19,6 +19,8 @@ import {
   Truck,
   Wrench,
   UserRound,
+  UserCog,
+  FileWarning,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -50,6 +52,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'routes', label: 'Safe Routes System', icon: Navigation },
     { id: 'analytics', label: 'Historical Analytics', icon: BarChart3 },
     { id: 'settings', label: 'System Settings', icon: Settings },
+    { id: 'profile', label: 'My Profile', icon: UserRound },
+    { id: 'account-settings', label: 'Account Settings', icon: UserCog },
+    { id: 'field-reports', label: 'Field Reports', icon: FileWarning },
     { id: 'login', label: 'Role Login Center', icon: LogIn },
   ];
 
@@ -92,9 +97,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Persistent Docked Sidebar (Desktop) / Slide-over Drawer (Mobile) */}
       <aside
-        className={`w-64 fixed left-0 top-14 bottom-0 z-40 bg-slate-900 border-r border-slate-800 backdrop-blur-xl flex flex-col shadow-2xl transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`w-64 fixed left-0 top-14 bottom-0 z-40 bg-slate-900 border-r border-slate-800 backdrop-blur-xl flex flex-col shadow-2xl transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
         {/* Operations Header inside Sidebar */}
         <div className="p-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
@@ -124,11 +128,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 key={item.id}
                 onClick={() => handleItemClick(item.id)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all ${
-                  isActive
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all ${isActive
                     ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 font-semibold shadow-[0_0_15px_rgba(0,240,255,0.2)]'
                     : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-2.5">
                   <Icon

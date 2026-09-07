@@ -1,0 +1,10 @@
+{
+  "name": "Drishti AI",
+  "short_name": "Drishti",
+  "description": "Offline-capable flood, landslide, and emergency response platform",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#070b14",
+  "theme_color": "#06b6d4",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

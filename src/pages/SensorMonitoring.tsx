@@ -36,7 +36,7 @@ export const SensorMonitoring: React.FC<SensorMonitoringProps> = ({
   useEffect(() => {
     DisasterShieldAPI.getLiveTelemetryMesh()
       .then((data) => setLiveMesh(data))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // Synthesize live internet/satellite telemetry sensor
@@ -159,11 +159,10 @@ export const SensorMonitoring: React.FC<SensorMonitoringProps> = ({
             <button
               key={type}
               onClick={() => setFilterType(type)}
-              className={`px-3 py-1.5 rounded-xl uppercase font-extrabold text-[11px] transition ${
-                filterType === type
+              className={`px-3 py-1.5 rounded-xl uppercase font-extrabold text-[11px] transition ${filterType === type
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
-              }`}
+                }`}
             >
               {type}
             </button>
@@ -206,22 +205,20 @@ export const SensorMonitoring: React.FC<SensorMonitoringProps> = ({
                   </td>
                   <td className="p-4">
                     <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-bold text-[11px] ${
-                        sensor.status === 'ONLINE'
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-bold text-[11px] ${sensor.status === 'ONLINE'
                           ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
                           : sensor.status === 'WARNING'
-                          ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
-                          : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
-                      }`}
+                            ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                            : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+                        }`}
                     >
                       <span
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          sensor.status === 'ONLINE'
+                        className={`w-1.5 h-1.5 rounded-full ${sensor.status === 'ONLINE'
                             ? 'bg-emerald-400 animate-pulse'
                             : sensor.status === 'WARNING'
-                            ? 'bg-amber-400'
-                            : 'bg-rose-400'
-                        }`}
+                              ? 'bg-amber-400'
+                              : 'bg-rose-400'
+                          }`}
                       />
                       {sensor.status}
                     </span>

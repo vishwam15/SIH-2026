@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { canonicalRole } = require('./geographicScope');
 
 const GOV_EMAIL_SUFFIXES = ['.gov', '.gov.in'];
 
@@ -37,8 +38,9 @@ const requireGovEmail = (req, res, next) => {
 };
 
 const restrictToDepartment = (...allowedRoles) => (req, res, next) => {
-  const userRole = req.user?.role;
-  if (!allowedRoles.includes(userRole)) {
+  const userRole = canonicalRole(req.user?.role);
+  const acceptedRoles = allowedRoles.map(canonicalRole);
+  if (!acceptedRoles.includes(userRole)) {
     return res.status(403).json({ message: 'Department access denied for this user role.' });
   }
   next();

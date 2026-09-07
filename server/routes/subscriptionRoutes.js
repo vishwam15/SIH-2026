@@ -1,6 +1,7 @@
 const express = require('express');
 const User = require('../models/User');
 const { verifyToken } = require('../middleware/auth');
+const { logAction } = require('../controllers/auditController');
 
 const router = express.Router();
 
@@ -27,6 +28,15 @@ router.post('/checkout', verifyToken, async (req, res) => {
     };
 
     await user.save();
+
+    await logAction({
+      actorId: user._id,
+      actorName: user.fullName,
+      actorRole: user.role,
+      action: 'SUBSCRIPTION_ACTIVATED',
+      targetType: 'subscription',
+      details: { plan },
+    });
 
     res.json({
       message: 'Subscription activated successfully.',

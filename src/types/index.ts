@@ -28,7 +28,10 @@ export type PageId =
   | 'alerts'
   | 'routes'
   | 'analytics'
-  | 'settings';
+  | 'settings'
+  | 'profile'
+  | 'account-settings'
+  | 'field-reports';
 
 export interface LocationCoordinates {
   lat: number;

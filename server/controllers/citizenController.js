@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const { logAction } = require('./auditController');
 
 const sendSOS = async (req, res) => {
   try {
@@ -27,6 +28,15 @@ const sendSOS = async (req, res) => {
       user.sosHistory.push(sosRecord);
       await user.save();
     }
+
+    await logAction({
+      actorId: req.user._id,
+      actorName: req.user.fullName,
+      actorRole: req.user.role,
+      action: 'SOS_TRIGGERED',
+      targetType: 'sos',
+      details: sosRecord.coordinates,
+    });
 
     res.status(201).json({
       success: true,

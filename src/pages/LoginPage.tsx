@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import type { UserRole, PageId } from '../types';
+import { DisasterShieldAPI } from '../services/api';
 import {
   Shield,
   Building2,
   Truck,
   Wrench,
-  Key,
-  Lock,
-  Mail,
   ShieldAlert,
   ArrowRight,
-  ArrowLeft,
+  Lock,
+  Mail,
+  Key,
   CheckCircle2,
+  ArrowLeft,
 } from 'lucide-react';
 
 interface LoginPageProps {
@@ -81,10 +82,47 @@ export const LoginPage: React.FC<LoginPageProps> = ({ users, onLoginSuccess, onN
   const activeRoleConfig = roles.find((r) => r.id === selectedRole) || roles[1];
   const requiresToken = selectedRole === 'admin' || selectedRole === 'authority';
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleRoleSelect = (role: UserRole) => {
+    setSelectedRole(role);
+    const demoUser = users.find((user) => user.role === role);
+    if (demoUser) {
+      setEmail(demoUser.email);
+      setPassword(demoUser.password);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setLoginError('');
+
+    try {
+      const backendUser = await DisasterShieldAPI.login(email, password);
+      const backendRoleMap: Record<string, UserRole> = {
+        admin: 'admin',
+        disaster_authority: 'authority',
+        response_team: 'response',
+        field_officer: 'field',
+        citizen: 'citizen',
+      };
+      const normalizedUser = {
+        ...backendUser,
+        id: backendUser.id || backendUser._id,
+        role: backendRoleMap[backendUser.role] || backendUser.role,
+        password,
+      };
+      if (normalizedUser.role !== selectedRole) {
+        setIsSubmitting(false);
+        setLoginError('This account belongs to a different role. Please choose the correct role.');
+        return;
+      }
+      setIsSubmitting(false);
+      onLoginSuccess(normalizedUser);
+      onNavigate('dashboard');
+      return;
+    } catch {
+      // Local demo users remain available when the backend is offline.
+    }
 
     const matchedUser = users.find(
       (user) =>
@@ -112,7 +150,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ users, onLoginSuccess, onN
 
       onLoginSuccess(matchedUser);
       onNavigate('dashboard');
-    }, 500);
+    }, 400);
   };
 
   return (
@@ -180,7 +218,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ users, onLoginSuccess, onN
                 <button
                   key={r.id}
                   type="button"
-                  onClick={() => setSelectedRole(r.id)}
+                  onClick={() => handleRoleSelect(r.id)}
                   className={`p-3.5 rounded-xl border text-left transition flex flex-col justify-between ${
                     isSelected
                       ? 'bg-emerald-500/20 border-emerald-500 text-white shadow-lg shadow-emerald-500/10'

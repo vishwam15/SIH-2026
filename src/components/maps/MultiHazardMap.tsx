@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
+import { MapContainer, Marker, Popup, Circle, useMap } from 'react-leaflet';
+import { AppMapTileLayer } from './AppMapTileLayer';
 import L from 'leaflet';
 import type { MapZone, SensorData, RiskLevel } from '../../types';
 import { RiskBadge } from '../common/RiskBadge';
@@ -219,11 +220,7 @@ export const MultiHazardMap: React.FC<MultiHazardMapProps> = ({
           scrollWheelZoom={true}
           className="z-10"
         >
-          <TileLayer
-            attribution='&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-            maxZoom={19}
-          />
+          <AppMapTileLayer defaultMode="dark" />
 
           {/* Map FlyTo Controller */}
           <MapFlyToController center={flyToCoords} />

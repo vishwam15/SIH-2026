@@ -1,9 +1,11 @@
 const Alert = require('../models/Alert');
 const { mockAlerts } = require('../data/mockData');
+const { scopeFromUser } = require('../middleware/geographicScope');
 
 const getActiveAlerts = async (req, res) => {
   try {
-    const alerts = await Alert.find({ active: true }).sort({ createdAt: -1 });
+    const geographicFilter = req.user ? scopeFromUser(req.user) : {};
+    const alerts = await Alert.find({ ...geographicFilter, active: true }).sort({ createdAt: -1 });
     if (!alerts.length) {
       return res.json(mockAlerts);
     }
@@ -40,6 +42,7 @@ const createAlert = async (req, res) => {
       hazardCategory,
       severity: severity || 'MODERATE',
       affectedArea,
+      ...(req.geographicFilter || {}),
       recommendedRoute: recommendedRoute || '',
       active: active !== undefined ? active : true,
       probabilityPct: probabilityPct || 0,
@@ -54,7 +57,37 @@ const createAlert = async (req, res) => {
   }
 };
 
+const escapeCsv = (value) => {
+  const str = value === undefined || value === null ? '' : String(value);
+  return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+};
+
+const exportAlertsCsv = async (req, res) => {
+  try {
+    const alerts = await Alert.find(req.geographicFilter || {}).sort({ createdAt: -1 }).lean();
+    const columns = [
+      { key: 'title', label: 'Title' },
+      { key: 'hazardCategory', label: 'Hazard Category' },
+      { key: 'severity', label: 'Severity' },
+      { key: 'affectedArea', label: 'Affected Area' },
+      { key: 'affectedPopulation', label: 'Affected Population' },
+      { key: 'probabilityPct', label: 'Probability (%)' },
+      { key: 'active', label: 'Active' },
+      { key: 'createdAt', label: 'Created At' },
+    ];
+    const header = columns.map((c) => c.label).join(',');
+    const body = alerts.map((a) => columns.map((c) => escapeCsv(a[c.key])).join(',')).join('\n');
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="active-alerts.csv"');
+    res.send(`${header}\n${body}`);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to export alerts', error: error.message });
+  }
+};
+
 module.exports = {
   getActiveAlerts,
   createAlert,
+  exportAlertsCsv,
 };

@@ -1,11 +1,14 @@
 const express = require('express');
-const { registerUser, loginUser } = require('../controllers/authController');
+const { registerUser, loginUser, updateMyProfile } = require('../controllers/authController');
 const { verifyToken, requireGovEmail, restrictToDepartment, checkSubscription } = require('../middleware/auth');
+const { loginRateLimiter } = require('../middleware/rateLimiter');
 
 const router = express.Router();
 
 router.post('/register', registerUser);
-router.post('/login', loginUser);
+router.post('/login', loginRateLimiter, loginUser);
+router.get('/me', verifyToken, (req, res) => res.json(req.user));
+router.patch('/me', verifyToken, updateMyProfile);
 
 router.get('/admin/test', verifyToken, restrictToDepartment('admin'), (req, res) => res.json({ ok: true, message: 'Admin route access granted.' }));
 router.get('/authority/test', verifyToken, requireGovEmail, restrictToDepartment('disaster_authority'), (req, res) => res.json({ ok: true, message: 'Authority route access granted.' }));

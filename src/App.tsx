@@ -17,6 +17,9 @@ import { Analytics } from './pages/Analytics';
 import { Settings } from './pages/Settings';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
+import { Profile } from './pages/Profile';
+import { AccountSettings } from './pages/AccountSettings';
+import { FieldReports } from './pages/FieldReports';
 import { FloodEvacuationChatbot } from './components/ai/FloodEvacuationChatbot';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 
@@ -92,6 +95,12 @@ const pageToPath = (page: PageId): string => {
       return '/analytics';
     case 'settings':
       return '/settings';
+    case 'profile':
+      return '/profile';
+    case 'account-settings':
+      return '/account-settings';
+    case 'field-reports':
+      return '/field-reports';
     default:
       return '/landingpage';
   }
@@ -124,6 +133,12 @@ const getPageFromPath = (pathname: string): PageId => {
       return 'analytics';
     case '/settings':
       return 'settings';
+    case '/profile':
+      return 'profile';
+    case '/account-settings':
+      return 'account-settings';
+    case '/field-reports':
+      return 'field-reports';
     default:
       return 'landing';
   }
@@ -175,6 +190,7 @@ export const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [liveLocations, setLiveLocations] = useState<any[]>([]);
   const [activeSos, setActiveSos] = useState<any[]>([]);
+  const [sessionHistory, setSessionHistory] = useState<{ timestamp: string; role: string }[]>([]);
   const liveSocketRef = useRef<any>(null);
 
   const handleLocationUpdate = useCallback((payload: any) => {
@@ -302,7 +318,36 @@ export const App: React.FC = () => {
     setCurrentUser(user);
     setUserRole(user.role);
     setUserEmail(user.email);
+    setSessionHistory((prev) => [{ timestamp: new Date().toISOString(), role: user.role }, ...prev]);
     handleNavigate('dashboard');
+  };
+
+  const handleProfileSave = (profile: any) => {
+    if (!currentUser) return;
+    const updated = { ...currentUser, ...profile };
+    setCurrentUser(updated);
+    setUsers((prev) => prev.map((u) => (u.id === currentUser.id ? updated : u)));
+    if (currentUser.token) DisasterShieldAPI.updateProfile(currentUser.token, profile).catch(() => undefined);
+  };
+
+  const handleAccountSettingsSave = (settings: any) => {
+    if (!currentUser) return;
+    const updatedUser = {
+      ...currentUser,
+      ...(settings.password ? { password: settings.password } : {}),
+      settings: { ...(currentUser.settings || {}), ...(settings.settings || {}) },
+    };
+    setCurrentUser(updatedUser);
+    setUsers((prev) => prev.map((u) => (u.id === currentUser.id ? updatedUser : u)));
+    if (currentUser.token) DisasterShieldAPI.updateProfile(currentUser.token, settings).catch(() => undefined);
+  };
+
+  const handleRescueDispatch = (sos: any, responder: any) => {
+    liveSocketRef.current?.emit('rescue:dispatch', {
+      sosUserId: sos.userId,
+      responderId: responder.userId,
+      responderRole: responder.role,
+    });
   };
 
   const handleSignupSuccess = (newUser: any) => {
@@ -451,12 +496,15 @@ export const App: React.FC = () => {
                     onNavigate={handleNavigate}
                     onSelectZone={handleSelectZone}
                     userRole={userRole}
+                    currentUserId={currentUser?.id}
                     userName={currentUser?.fullName || userEmail}
+                    authToken={currentUser?.token}
                     userLocation={userLocation}
                     liveLocations={liveLocations}
                     activeSos={activeSos}
                     onUseMyLocation={handleUseMyLocation}
                     onTriggerSOS={handleCitizenSOS}
+                    onDispatchRescue={handleRescueDispatch}
                   />
                 }
               />
@@ -477,6 +525,22 @@ export const App: React.FC = () => {
               <Route path="/routes" element={<SafeRoutes routes={safeRoutes} />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/profile" element={<Profile user={currentUser} onSave={handleProfileSave} />} />
+              <Route
+                path="/account-settings"
+                element={
+                  <AccountSettings
+                    user={currentUser}
+                    sessionHistory={sessionHistory}
+                    onSave={handleAccountSettingsSave}
+                    onDeactivate={() => {
+                      setCurrentUser(null);
+                      handleNavigate('login');
+                    }}
+                  />
+                }
+              />
+              <Route path="/field-reports" element={<FieldReports user={currentUser} />} />
               <Route path="*" element={<Navigate to="/landingpage" replace />} />
             </Routes>
           </ErrorBoundary>

@@ -10,6 +10,8 @@ import type {
 import { StatCard } from '../components/common/StatCard';
 import { QuickAlertsTicker } from '../components/dashboard/QuickAlertsTicker';
 import { MultiHazardMap } from '../components/maps/MultiHazardMap';
+import { ModelTrainingPanel } from '../components/dashboard/ModelTrainingPanel';
+import { RescueCoordinationPanel } from '../components/dashboard/RescueCoordinationPanel';
 import { CitizenSafetyOverlay } from '../components/maps/CitizenSafetyOverlay';
 import { LiveGISMap } from '../components/LiveGISMap';
 import { RiskBadge } from '../components/common/RiskBadge';
@@ -41,11 +43,14 @@ interface DashboardProps {
   onSelectZone: (zone: MapZone) => void;
   userRole?: UserRole;
   userName?: string;
+  authToken?: string;
+  currentUserId?: string;
   userLocation?: { lat: number; lng: number } | null;
   liveLocations?: any[];
   activeSos?: any[];
   onUseMyLocation?: () => void;
   onTriggerSOS?: () => void;
+  onDispatchRescue?: (sos: any, responder: any) => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -57,11 +62,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onSelectZone,
   userRole = 'authority',
   userName,
+  authToken,
+  currentUserId,
   userLocation,
   liveLocations = [],
   activeSos = [],
   onUseMyLocation,
   onTriggerSOS,
+  onDispatchRescue,
 }) => {
   const criticalZones = zones.filter(
     (z) => z.riskLevel === 'CRITICAL' || z.riskLevel === 'HIGH'
@@ -253,6 +261,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
+      <ModelTrainingPanel userRole={userRole} authToken={authToken} />
+
       {/* Quick Alert Banner */}
       <QuickAlertsTicker alerts={alerts} onViewAllAlerts={() => onNavigate('alerts')} />
 
@@ -366,13 +376,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </span>
         </div>
 
-        <div className="relative">
-          {userRole === 'citizen' || userRole === 'authority' || userRole === 'field' ? (
+        <div className={userRole === 'citizen' ? 'grid items-stretch gap-4 lg:grid-cols-[minmax(0,1fr)_320px]' : 'relative'}>
+          {userRole === 'citizen' || userRole === 'authority' || userRole === 'field' || userRole === 'response' ? (
             <LiveGISMap
               userRole={userRole}
+              currentUserId={currentUserId}
               currentUserLocation={userLocation}
               liveLocations={liveLocations}
               activeSos={activeSos}
+              zones={zones}
+              safeZone={{ name: 'Community Relief Center', lat: 19.0821, lng: 72.8847 }}
             />
           ) : (
             <MultiHazardMap
@@ -385,7 +398,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           {userRole === 'citizen' && (
             <CitizenSafetyOverlay
-              onTriggerSOS={() => onNavigate('alerts')}
+              onTriggerSOS={onTriggerSOS || (() => onNavigate('alerts'))}
               shelterName="Community Relief Center"
               distanceKm={2.4}
               travelMinutes={14}
@@ -393,6 +406,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
           )}
         </div>
       </div>
+
+      <RescueCoordinationPanel
+        userRole={userRole}
+        liveLocations={liveLocations}
+        activeSos={activeSos}
+        onDispatch={onDispatchRescue}
+      />
 
       {/* Bottom Grid: Sector Priority Table & Sensor Live Stream */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

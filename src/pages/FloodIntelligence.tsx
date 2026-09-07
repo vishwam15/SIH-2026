@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { FloodMetrics, PageId } from '../types';
 import { CircularGauge } from '../components/common/CircularGauge';
 import { DrainageStressCard } from '../components/dashboard/DrainageStressCard';
+import { UrbanFloodNowcast } from '../components/maps/UrbanFloodNowcast';
+import { DisasterShieldAPI } from '../services/api';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -26,6 +28,36 @@ export const FloodIntelligence: React.FC<FloodIntelligenceProps> = ({
   metrics,
   onNavigate,
 }) => {
+  const [nowcast, setNowcast] = useState<any>(null);
+  const [mlPrediction, setMlPrediction] = useState<any>(null);
+  const [nowcastLoading, setNowcastLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    DisasterShieldAPI.getUrbanFloodNowcast()
+      .then((data) => {
+        if (!cancelled) setNowcast(data);
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (!cancelled) setNowcastLoading(false);
+      });
+    DisasterShieldAPI.predictFlood({
+      rainfall_mm_hr: metrics.rainfallIntensityMmHr,
+      water_level_m: metrics.waterLevelM,
+      drainage_capacity_pct: metrics.drainageCapacityPct,
+      imperviousness_pct: 90,
+      elevation_m: 7,
+    })
+      .then((data) => {
+        if (!cancelled) setMlPrediction(data);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [metrics]);
+
   return (
     <div className="p-6 space-y-6 pb-12">
       {/* Top Banner */}
@@ -55,6 +87,9 @@ export const FloodIntelligence: React.FC<FloodIntelligenceProps> = ({
           <Activity className="w-4 h-4" /> AI Prediction Breakdown &rarr;
         </button>
       </div>
+
+      {/* Street-Level Urban Flood Nowcasting Map */}
+      <UrbanFloodNowcast nowcast={nowcast} mlPrediction={mlPrediction} loading={nowcastLoading} />
 
       {/* Main Top Grid: Circular Risk Gauge & Live Data Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
