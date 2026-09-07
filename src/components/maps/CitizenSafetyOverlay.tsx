@@ -21,7 +21,7 @@ export const CitizenSafetyOverlay: React.FC<CitizenSafetyOverlayProps> = ({
   ];
 
   return (
-    <div className="absolute bottom-4 right-4 z-[1000] w-[320px] rounded-2xl border border-rose-500/30 bg-slate-900/88 backdrop-blur-xl shadow-[0_20px_60px_rgba(15,23,42,0.75)] p-4 text-white">
+    <div className="w-full rounded-2xl border border-rose-500/30 bg-slate-900/90 backdrop-blur-xl shadow-[0_20px_60px_rgba(15,23,42,0.75)] p-5 text-white flex flex-col justify-between">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="rounded-xl bg-rose-500/10 border border-rose-500/30 p-2 text-rose-400">

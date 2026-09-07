@@ -238,7 +238,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="bg-slate-950/80 px-3 py-1.5 rounded-xl border border-slate-800 flex items-center gap-2">
             <CloudRain className="w-4 h-4 text-cyan-400" />
             <span className="text-slate-400">Precipitation:</span>
-            <span className="font-extrabold text-white font-mono">{stats.currentRainfallMmHr.toFixed(1)} mm/hr</span>
+            <span className="font-extrabold text-white font-mono">{(stats?.currentRainfallMmHr ?? 0).toFixed(1)} mm/hr</span>
           </div>
 
           <div className="bg-slate-950/80 px-3 py-1.5 rounded-xl border border-slate-800 flex items-center gap-2">
@@ -277,9 +277,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <p className="text-[11px] text-slate-300 mt-1">
               {userName ? `Welcome ${userName.split(' ')[0]}` : 'Flood risk in your local sector'}
             </p>
-            {userLocation && (
-              <p className="text-[10px] mt-2 text-slate-400">
-                Live: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+            {userLocation?.lat != null && userLocation?.lng != null && (
+              <p className="text-[10px] mt-2 text-slate-400 font-mono">
+                Live: {Number(userLocation.lat).toFixed(4)}, {Number(userLocation.lng).toFixed(4)}
               </p>
             )}
           </div>
@@ -376,7 +376,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </span>
         </div>
 
-        <div className={userRole === 'citizen' ? 'grid items-stretch gap-4 lg:grid-cols-[minmax(0,1fr)_320px]' : 'relative'}>
+        <div className={userRole === 'citizen' ? 'grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]' : 'relative'}>
           {userRole === 'citizen' || userRole === 'authority' || userRole === 'field' || userRole === 'response' ? (
             <LiveGISMap
               userRole={userRole}
